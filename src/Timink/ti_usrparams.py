@@ -1,4 +1,4 @@
-# Timink - an Inkscape plugin for digital timing diagrams.
+# Timink - an Inkscape extension for digital timing diagrams.
 # Copyright (C) 2010 Daniel Lutz
 #
 # This program is free software; you can redistribute it and/or

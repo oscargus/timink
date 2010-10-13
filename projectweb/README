@@ -1,0 +1,13 @@
+Content for the Sourceforge web server (VROOT for project web).
+
+  htdocs/
+
+corresponds to
+
+  /home/groups/t/ti/timink/htdocs
+
+on
+
+  web.sourceforge.net.
+
+See https://sourceforge.net/apps/trac/sourceforge/wiki/Project%20web.
