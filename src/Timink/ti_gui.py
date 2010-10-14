@@ -54,10 +54,8 @@ def printMessage(s, firstLinePrefix=''):
     for line in lines[1:]:
         print >> sys.stderr, contLinePrefix + line
 
-
 def printInfo(s):
     printMessage(s, 'Info: ')
-
 
 def showErrorDlg(msg, hint = None, title = None):
     assert msg is not None and len(msg) > 0
@@ -117,6 +115,7 @@ class WrapLabel(gtk.Label):
         if self.__wrap_width != width:
             self.__wrap_width = width
             self.queue_resize()
+
 
 class LengthEditor(object):
 
