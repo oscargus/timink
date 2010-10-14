@@ -247,6 +247,7 @@ class SignalSpec(object):
         assert len(stateStr) > 0
         assert len(self.states) == 0 or t > self.states[-1][0]
         reducedStateStr = SignalSpec._reduceToPeriod(stateStr)
+        doShade = doShade and len(reducedStateStr) >= 2 and reducedStateStr[0] != reducedStateStr[1]
         if len(self.states) >= 2 and self.states[-2][1:] == self.states[-1][1:]:
             del self.states[-1]
         self.states.append((float(t), reducedStateStr, doShade))
@@ -537,10 +538,11 @@ class SignalSpec(object):
                 path0Sub = SignalSpec._getVerticesSlice(pathVerticesList[0], startTimeBound, endTimeBound)
                 path1Sub = SignalSpec._getVerticesSlice(pathVerticesList[1], startTimeBound, endTimeBound)
                 shading01Vertices = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
-                if len(shading01Vertices) > 0 and shading01Vertices[-1][0][0] < endTime and path0Sub[-1][1] != path1Sub[-1][1]:
+                if endTimeBound != endTime and len(shading01Vertices) > 0 \
+                    and shading01Vertices[-1][0][0] < endTime and path0Sub[-1][1] != path1Sub[-1][1]:
                     # last shading area starts before endTime and ends with path0Sub, path1Sub
-                    # -> no intersection
-                    # -> shorted to endTime
+                    # -> no intersection after endTime
+                    # -> shorten to endTime
                     path0Sub = SignalSpec._getVerticesSlice(pathVerticesList[0], startTimeBound, endTime)
                     path1Sub = SignalSpec._getVerticesSlice(pathVerticesList[1], startTimeBound, endTime)
                     shading01Vertices = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
@@ -836,10 +838,11 @@ class SignalSpec(object):
         assert p[3][1:] == [(4.0, 0.5), (5.0, 0.0), (4.0, 1.0)]
 
         assert SignalSpec()._getShadingRanges() == []
-        assert SignalSpec([(0.0, '0'), (1.0, '1', True)])._getShadingRanges() == [(1, 2)]
-        assert SignalSpec([(0.0, '0'), (1.0, '1', True), (2.0, '0', True)])._getShadingRanges() == [(1, 3)]
-        l = [(0.0, '0', True), (1.0, '1'), (2.0, '0', True), (3.0, '1', True), (4.0, '0'), (5.0, '1')]
+        assert SignalSpec([(0.0, '01'), (1.0, '10', True)])._getShadingRanges() == [(1, 2)]
+        assert SignalSpec([(0.0, '01'), (1.0, '10', True), (2.0, '01', True)])._getShadingRanges() == [(1, 3)]
+        l = [(0.0, '01', True), (1.0, '10'), (2.0, '01', True), (3.0, '10', True), (4.0, '01'), (5.0, '10')]
         assert SignalSpec(l)._getShadingRanges() == [(0, 1), (2, 4)]
+        assert SignalSpec([(0.0, '0', True), (1.0, '1', True), (2.0, '110', True)])._getShadingRanges() == []
 
         s = [
             (0.0, '0'), (1.0, '01', True), (3.0, '10'), (4.0, '01'),
@@ -904,6 +907,9 @@ class SignalSpec(object):
             [(10.0, 1.0), (10.0, 0.0), (20.0, 0.4), (20.0, 0.6)], [(30.0, 1.0), (30.0, 0.0), (40.0, 0.4), (40.0, 0.6)]
         ]
         assert verticesListEqual(l, lExpected, 1e-6, 1e-6)
+
+        l = SignalSpec.createFromStr('0[0]X[1]1', 10.0).getAllPathVerticesAndShading(25.0)[1]
+        assert l == []
 
 
 SignalSpecParser.testIt()
