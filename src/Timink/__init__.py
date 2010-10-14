@@ -205,12 +205,12 @@ class Timink(inkex.Effect):
         assert len(incomplSignalOriginDict) > 0
         assert None not in incomplSignalOriginDict.values()
         assert len(incomplSignalOriginDict) == 0 \
-            or (min(incomplSignalOriginDict.keys()) >= 0 and max(incomplSignalOriginDict.keys()) < n)
+            or (min(incomplSignalOriginDict) >= 0 and max(incomplSignalOriginDict) < n)
         assert isfinite(originDiffX) and isfinite(originDiffY)
 
         signalOriginDict = dict()
 
-        refSignalIndex = min(incomplSignalOriginDict.keys())
+        refSignalIndex = min(incomplSignalOriginDict)
         xR, yR = incomplSignalOriginDict[refSignalIndex]
         for signalIndex in range(0, n):
             di = signalIndex - refSignalIndex
@@ -238,7 +238,7 @@ class Timink(inkex.Effect):
         assert len(incomplSignalOriginDict) > 1
         assert None not in incomplSignalOriginDict.values()
         assert len(incomplSignalOriginDict) == 0 \
-            or (min(incomplSignalOriginDict.keys()) >= 0 and max(incomplSignalOriginDict.keys()) < n)
+            or (min(incomplSignalOriginDict) >= 0 and max(incomplSignalOriginDict) < n)
 
         def vectorDiff((aX, aY), (bX, bY)):
             return (aX - bX, aY - bY)
@@ -444,6 +444,12 @@ class Timink(inkex.Effect):
                                     # new matching path in template signal group
                                     # -> copy style from preceding path instead
                                     newSignalPath.copyStyleFrom(signalPaths[pathIndex - 1])
+                                if pathIndex == 0:
+                                    # create empty 'path' element to preserve the style
+                                    for pi in range(pathNo, len(signalPathsOfTmplSignalGroup)):
+                                        emptySignalPath = signalGroup.addSignalPath(pi, [], -signalHeight, (0, 0))
+                                        emptySignalPath.copyStyleFrom(signalPathsOfTmplSignalGroup[pi])
+                                        del emptySignalPath
                         else:
                             newSignalPath = signalGroup.addSignalPath(pathIndex, [pathVertices], -signalHeight, (0, 0))
                             if pathIndex == 0:
@@ -486,6 +492,11 @@ class Timink(inkex.Effect):
                     if shading is not None:
                         newShading.copyStyleFrom(shading)
                         shading.remove()
+                    elif styleTmplSignalIndex is not None:
+                        tmplSignalGroup, signalPathsOfTmplSignalGroup, shadingOfTmplSignalGroup \
+                            = sgInfoDict[styleTmplSignalIndex]
+                        if shadingOfTmplSignalGroup is not None:
+                            newShading.copyStyleFrom(shadingOfTmplSignalGroup)
                     shading = newShading
                     shading.copyTransformFrom(signalPaths[0])
                     if shading.removeStroke():
