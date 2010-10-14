@@ -419,23 +419,31 @@ class Timink(inkex.Effect):
                                 transf = PointTransf.createConcat(transf, PointTransf.createTransl(originDiff))
                                 signalGroup.setTransform(transf)
 
+                    # determine signal group, whose style is to be used for a new signal group
+                    styleTmplSignalIndex = None
+                    if signalIndex > 0:
+                        styleTmplSignalIndex = signalIndex - 1
+                    elif len(sgInfoDict) > 0:
+                        # first existing signal group
+                        styleTmplSignalIndex = min(sgInfoDict)
+                    assert styleTmplSignalIndex is None or styleTmplSignalIndex in sgInfoDict
+
                     for pathIndex in range(0, pathNo):
                         pathVertices = pathVerticesList[pathIndex]
                         oldSignalPath = signalPaths[pathIndex]
                         if oldSignalPath is None:
-                            # no template signal 'path' available -> create new one
+                            # no old signal 'path' available -> create new one
                             newSignalPath = signalGroup.addSignalPath(pathIndex, [pathVertices], -signalHeight, (0, 0))
-                            if pathIndex > 0:
-                                # copy style from preceding path
-                                newSignalPath.copyStyleFrom(signalPaths[pathIndex - 1])
-                            elif signalIndex > 0:
-                                # copy style from signal path 0 of preceding signal group
-                                # better: copy styles of all signal paths from preceding signal group???
-                                precSignalGroup, signalPathsOfPrecSignalGroup, shadingOfPrecSignalGroup \
-                                    = sgInfoDict[signalIndex - 1]
-                                assert len(signalPathsOfPrecSignalGroup) > 0
-                                assert signalPathsOfPrecSignalGroup[0] is not None
-                                newSignalPath.copyStyleFrom(signalPathsOfPrecSignalGroup[0])
+                            if styleTmplSignalIndex is not None:
+                                tmplSignalGroup, signalPathsOfTmplSignalGroup, shadingOfTmplSignalGroup \
+                                    = sgInfoDict[styleTmplSignalIndex]
+                                if pathIndex < len(signalPathsOfTmplSignalGroup):
+                                    # matching path in template signal group
+                                    newSignalPath.copyStyleFrom(signalPathsOfTmplSignalGroup[pathIndex])
+                                else:
+                                    # new matching path in template signal group
+                                    # -> copy style from preceding path instead
+                                    newSignalPath.copyStyleFrom(signalPaths[pathIndex - 1])
                         else:
                             newSignalPath = signalGroup.addSignalPath(pathIndex, [pathVertices], -signalHeight, (0, 0))
                             if pathIndex == 0:
