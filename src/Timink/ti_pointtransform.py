@@ -32,9 +32,9 @@ class PointTransf:
          \ m21 m22 /        \ oY /
     """
 
-    def __init__(self, (m11, m12, m21, m22), (oX, oY)):
-        self.m = (m11, m12, m21, m22)
-        self.o = (oX, oY)
+    def __init__(self, m, o):
+        self.m = m # (m11, m12, m21, m22)
+        self.o = o # (oX, oY)
         assert self.isFinite()
 
     def isFinite(self):
@@ -61,11 +61,12 @@ class PointTransf:
         return PointTransf((1, 0, 0, 1), (0, 0))
 
     @staticmethod
-    def createTransl((tx, ty)):
-        t = None
+    def createTransl(t):
+        tx, ty = t
+        transf = None
         if isfinite(tx) and isfinite(ty):
-            t = PointTransf((1, 0, 0, 1), (tx, ty))
-        return t
+            transf = PointTransf((1, 0, 0, 1), (tx, ty))
+        return transf
 
     @staticmethod
     def createScale(sx, sy):
@@ -108,7 +109,8 @@ class PointTransf:
         return t
 
     @staticmethod
-    def createRot(aDegree, (cX, cY)):
+    def createRot(aDegree, c):
+        cX, cY = c
         t = None
         if isfinite(cX) and isfinite(cY):
             t = PointTransf.createRot0(aDegree)
@@ -167,7 +169,8 @@ class PointTransf:
             t = PointTransf((m11, m12, m21, m22), (oX, oY))
         return t
 
-    def applyTo(self, (x, y)):
+    def applyTo(self, p):
+        x, y = p
         if self.isIdentity():
             xt, yt = (x, y)
         else:

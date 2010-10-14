@@ -388,7 +388,7 @@ class PathElem(Elem):
         The y-coordinates are inverted (increase: towards the top of the canvas).
 
         startPoint is None or (startPointX, startPointY).
-        If startPoint is not, all vertex positions are calculated
+        If startPoint is None, all vertex positions are calculated
         as (x + startPointX, yScale * y + startPointY).
 
         If startPoint is not None, the first -- probably invisible -- point of the resulting path
@@ -552,7 +552,7 @@ class TiminkSignalGElem(Elem):
         signalGroup.setLabel(label)
         return signalGroup
 
-    def addSignalPath(self, pathIndex, verticesList, yScale, (startPointX, startPointY)):
+    def addSignalPath(self, pathIndex, verticesList, yScale, startPoint):
         """
         Inserts a signal path element below this node, consisting of line segments
         according to the given vertices.
@@ -562,7 +562,7 @@ class TiminkSignalGElem(Elem):
         The y-coordinates are inverted (increase: towards the top of the canvas).
 
         startPoint is None or (startPointX, startPointY).
-        If startPoint is not, all vertex positions are calculated
+        If startPoint is None, all vertex positions are calculated
         as (x + startPointX, yScale * y + startPointY).
 
         If startPoint is not None, the first -- probably invisible -- point of the resulting path
@@ -571,15 +571,14 @@ class TiminkSignalGElem(Elem):
         assert self._node is not None
         assert pathIndex >= 0
         assert verticesList is not None
-        assert isfinite(startPointX) and isfinite(startPointY)
+        assert startPoint is None or (isfinite(startPoint[0]) and isfinite(startPoint[1]))
 
         styleDict = {'stroke': 'black', 'fill': 'none'}
-        p = PathElem.addCombinedLines(self._node, verticesList, yScale, (startPointX, startPointY),
-                                      styleDict, False)
+        p = PathElem.addCombinedLines(self._node, verticesList, yScale, startPoint, styleDict, False)
         p.setLabel(TiminkSignalGElem._LABEL_SIGNALPATH + str(pathIndex))
         return p
 
-    def addShadingPath(self, verticesList, yScale, (startPointX, startPointY)):
+    def addShadingPath(self, verticesList, yScale, startPoint):
         """
         Inserts a shading path element below this node, consisting of line segments
         according to the given point vertices.
@@ -589,19 +588,18 @@ class TiminkSignalGElem(Elem):
         The y-coordinates are inverted (increase: towards the top of the canvas).
 
         startPoint is None or (startPointX, startPointY).
-        If startPoint is not, all vertex positions are calculated
+        If startPoint is None, all vertex positions are calculated
         as (x + startPointX, yScale * y + startPointY).
 
-        If startPoint is not None, the first -- probably invisible -- point of the resulting path
+        If startPoint is not None???, the first -- probably invisible -- point of the resulting path
         is startPoint.
         """
         assert self._node is not None
         assert verticesList is not None
-        assert isfinite(startPointX) and isfinite(startPointY)
+        assert startPoint is None or (isfinite(startPoint[0]) and isfinite(startPoint[1]))
 
         styleDict = {'stroke': 'none', 'fill': 'black', 'fill-opacity': '0.25'}
-        p = PathElem.addCombinedLines(self._node, verticesList, yScale, (startPointX, startPointY),
-                                      styleDict, True)
+        p = PathElem.addCombinedLines(self._node, verticesList, yScale, startPoint, styleDict, True)
         p.setLabel(TiminkSignalGElem._LABEL_SHADINGPATH)
         return p
 

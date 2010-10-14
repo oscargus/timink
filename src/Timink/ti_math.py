@@ -50,7 +50,7 @@ def gcd(a, b):
     return a
 
 def lcm(a, b):
-    return (a * b) / gcd(a, b)
+    return (a * b) // gcd(a, b)
 
 assert lcm(1, 1) == 1
 assert lcm(6, 4) == 12

@@ -216,7 +216,10 @@ class SignalSpec(object):
         return s
 
     @staticmethod
-    def _isCollinear((x1, y1), (x0, y0), (x2, y2)):
+    def _isCollinear(p1, p0, p2):
+        x1, y1 = p1
+        x0, y0 = p0
+        x2, y2 = p2
         v1 = (x1 - x0, y1 - y0)
         v2 = (x2 - x0, y2 - y0)
         # scalar product of difference vectors
