@@ -26,7 +26,8 @@ try:
 except ImportError:
     raise RuntimeError("pygtk ist not available!")
 
-from ti_base import EXTENSION_NAME, VERSIONSTR
+from ti_info import EXTENSION_NAME, VERSIONJOINT
+from ti_version import VersionJoint
 from ti_math import isfinite
 from ti_signalspec import SignalSpecParser
 from ti_usrparams import UsrParams
@@ -73,6 +74,49 @@ def showErrorDlg(msg, hint = None, title = None):
         if hint is not None and len(hint) > 0:
             printMessage(hint, '       ')
 
+# from http://people.gnome.org/~gianmt/busybox.py
+# (found via http://stackoverflow.com/questions/1893748/pygtk-dynamic-label-wrapping):
+class WrapLabel(gtk.Label):
+    __gtype_name__ = 'WrapLabel'
+
+    def __init__(self, str=None):
+        gtk.Label.__init__(self)
+
+        self.__wrap_width = 0
+        self.layout = self.get_layout()
+        self.layout.set_wrap(pango.WRAP_WORD_CHAR)
+
+        if str != None:
+            self.set_text(str)
+
+        self.set_alignment(0.0, 0.0)
+
+    def do_size_request(self, requisition):
+        layout = self.get_layout()
+        width, height = layout.get_pixel_size()
+        requisition.width = 0
+        requisition.height = height
+
+    def do_size_allocate(self, allocation):
+        gtk.Label.do_size_allocate(self, allocation)
+        self.__set_wrap_width(allocation.width)
+
+    def set_text(self, str):
+        gtk.Label.set_text(self, str)
+        self.__set_wrap_width(self.__wrap_width)
+
+    def set_markup(self, str):
+        gtk.Label.set_markup(self, str)
+        self.__set_wrap_width(self.__wrap_width)
+
+    def __set_wrap_width(self, width):
+        if width == 0:
+            return
+        layout = self.get_layout()
+        layout.set_width(width * pango.SCALE)
+        if self.__wrap_width != width:
+            self.__wrap_width = width
+            self.queue_resize()
 
 class LengthEditor(object):
 
@@ -115,8 +159,8 @@ class LengthEditor(object):
         self.unitCombo.show()
 
         self.hbox = gtk.HBox()
-        self.hbox.pack_start(self.valueSpinner, True, True)
-        self.hbox.pack_start(self.unitCombo, False, False)
+        self.hbox.pack_start(self.valueSpinner, expand=True, fill=True)
+        self.hbox.pack_start(self.unitCombo, expand=False, fill=False)
 
     def getWidget(self):
         return self.hbox
@@ -138,7 +182,7 @@ class LengthEditor(object):
 class GUISignalSpecEditor(object):
     """Editor for signal specification and user parameters."""
 
-    def __init__(self, signalSpecStr, usrParams, isNew=True, hasPositions=True):
+    def __init__(self, signalSpecStr, usrParams, existingVersionJoint, isNew, hasPositions):
         assert usrParams is not None
         assert usrParams.isValid()
 
@@ -148,6 +192,7 @@ class GUISignalSpecEditor(object):
             signalSpecStr = unicode(signalSpecStr, errors='replace')
         self.signalSpecStr = signalSpecStr
         self.usrParams = usrParams
+        self.existingVersionJoint = existingVersionJoint
         self.isNew = isNew
         self.hasPositions = hasPositions
 
@@ -195,8 +240,8 @@ class GUISignalSpecEditor(object):
         exampleExpander.show()
 
         signalSpecPageVBox = gtk.VBox()
-        signalSpecPageVBox.pack_start(signalSpecScroll, True, True)
-        signalSpecPageVBox.pack_start(exampleExpander, False, True)
+        signalSpecPageVBox.pack_start(signalSpecScroll, expand=True, fill=True)
+        signalSpecPageVBox.pack_start(exampleExpander, expand=False, fill=True)
         signalSpecPageVBox.show()
 
         self.signalSpecTextView = signalSpecTextView
@@ -267,11 +312,11 @@ class GUISignalSpecEditor(object):
         tableAlignm.set_padding(padding_top=0, padding_bottom=6, padding_left=24, padding_right=6)
         tableAlignm.add(table)
         placmHomogVBox = gtk.VBox()
-        placmHomogVBox.pack_start(placmHomogRadioButton, False, False)
-        placmHomogVBox.pack_start(tableAlignm, False, False)
+        placmHomogVBox.pack_start(placmHomogRadioButton, expand=False, fill=False)
+        placmHomogVBox.pack_start(tableAlignm, expand=False, fill=False)
         radioGroupVBox = gtk.VBox()
-        radioGroupVBox.pack_start(placmIndivRadioButton, False, False)
-        radioGroupVBox.pack_start(placmHomogVBox, False, False)
+        radioGroupVBox.pack_start(placmIndivRadioButton, expand=False, fill=False)
+        radioGroupVBox.pack_start(placmHomogVBox, expand=False, fill=False)
         placmIndivRadioButton.set_tooltip_text(
             u'Keep placement of all existing signals ' +
             u'and determine origin of new signals by linear interpolation/extrapolation ' +
@@ -298,11 +343,65 @@ class GUISignalSpecEditor(object):
         signalLayoutFrame.show_all()
 
         layoutVBox = gtk.VBox()
-        layoutVBox.pack_start(signalGeomFrame, False, False)
-        layoutVBox.pack_start(signalLayoutFrame, False, False)
+        layoutVBox.pack_start(signalGeomFrame, expand=False, fill=False)
+        layoutVBox.pack_start(signalLayoutFrame, expand=False, fill=False)
         layoutVBox.show()
 
         return layoutVBox
+
+    def _createWarningArea(self, labelStr):
+        warningHBox = gtk.HBox()
+        warningHBox.set_border_width(6)
+        warningHBox.set_spacing(12)
+        icon = gtk.Image()
+        icon.set_from_stock(gtk.STOCK_DIALOG_WARNING, gtk.ICON_SIZE_MENU)
+        icon.set_alignment(0.0, 0.5)
+        textLabel = WrapLabel(labelStr)
+        textLabel.set_alignment(0.0, 0.5)
+        textLabel.set_line_wrap(True)
+        warningHBox.pack_start(icon, expand=False, fill=False)
+        warningHBox.pack_start(textLabel, expand=True, fill=True)
+        warningHBox.show_all()
+        return warningHBox
+
+    def _createOptionalVersionWarningArea(self, existingVersionJoint, runningVersionJoint):
+        """
+        Compares tho versions and creates a warning area with a description of the difference,
+        if the differ.
+
+        existingVersionJoint: version (VersionJoint object) used for creation of the existing Timink object
+        runningVersionJoint:  version (VersionJoint object) of running Timink
+
+        Returns: None or the widget of the warning area
+        """
+        warningArea = None
+        if existingVersionJoint is not None and runningVersionJoint is not None and existingVersionJoint != runningVersionJoint:
+            if existingVersionJoint.model != runningVersionJoint.model:
+                assert len(existingVersionJoint.model.components) == 2
+                assert len(runningVersionJoint.model.components) == 2
+                if existingVersionJoint.model.components[0] != runningVersionJoint.model.components[0]:
+                    labelStr = u'This object was created with Timink {rv}, ' \
+                             + u'which uses a different (not fully compatible) SVG representation of the Timink object.\n\n' \
+                             + u'This object will be changed to the SVG representation of the running version.\n' \
+                             + u'When edited with the original version of Timink, some elements will probably not be updated.'
+                elif existingVersionJoint.model < runningVersionJoint.model:
+                    labelStr = u'This object was created with Timink {rv}.' \
+                             + u'The running version uses additional elements / attribute in its SVG representation of the Timink object.\n\n' \
+                             + u'This object will be upgraded to the SVG representation of the running version.\n' \
+                             + u'When edited with the original version of Timink, the additional elements remain untouched.'
+                else:
+                    labelStr = u'This object was created with Timink {rv}, '\
+                             + u'which uses additional elements / attributes in its SVG representation of the Timink object. ' \
+                             + u'These are unsupported by the running Timink version.\n\n' \
+                             + u'This object will be downgraded to the SVG representation of the running version.\n' \
+                             + u'Unsupported elements remain untouched.'
+
+            else:
+                labelStr = u'This object was created with Timink {rv}, which is compatible with the running version.'
+
+            labelStr = labelStr.format(rv=str(existingVersionJoint.extension))
+            warningArea = self._createWarningArea(labelStr)
+        return warningArea
 
     def _cb_radioButtonToggled(self, widget, data=None):
         radioButton = data
@@ -318,7 +417,8 @@ class GUISignalSpecEditor(object):
         signalSpec is a valid signal specification and usrParams is a valid UsrParams object.
         """
 
-        dlg = gtk.Dialog(EXTENSION_NAME, None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT) # ???
+        dlgTitle = unicode(EXTENSION_NAME) + ' ' + unicode(VERSIONJOINT.extension)
+        dlg = gtk.Dialog(dlgTitle, None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT) # ???
         dlg.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT)
         if self.isNew:
             newButton = dlg.add_button(gtk.STOCK_NEW, gtk.RESPONSE_ACCEPT)
@@ -336,7 +436,10 @@ class GUISignalSpecEditor(object):
         del layoutPage
         paramNotebook.show()
 
-        dlg.vbox.pack_start(paramNotebook, True, True, 5)
+        warningArea = self._createOptionalVersionWarningArea(self.existingVersionJoint, VERSIONJOINT)
+        if warningArea is not None:
+            dlg.vbox.pack_start(warningArea, expand=False, fill=False)
+        dlg.vbox.pack_start(paramNotebook, expand=True, fill=True, padding=6)
 
         signalSpec = None
         usrParams = None

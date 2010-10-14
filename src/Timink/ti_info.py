@@ -15,7 +15,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-__version__ = '0.0.1'
-VERSIONSTR = __version__
+from ti_version import VersionJoint
+
 EXTENSION_NAME = 'Timink'
 
+# <joint-version-number> ::= <extension-version-number> "/" <model-version-number>.
+#
+# <extension-version-number>:
+#     version number <major> "." <minor> "." <mini> [ <appendix> ] of the extension
+#
+# <model-version-number>:
+#     version number <major> "." <minor> of the model (the SVG representation of a Timink object).
+#     If only new elements or attributes are added without changing any of the elements or attributes:
+#         Increment only <minor>.
+#     If one of the elements or attributes is removed are has a different meaning:
+#         Increase <major> and set <minor> to 0.
+
+VERSIONJOINT = VersionJoint('0.0.1/0.0')

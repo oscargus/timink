@@ -18,7 +18,8 @@
 import re
 import simplestyle
 import inkex
-from ti_base import VERSIONSTR
+from ti_info import VERSIONJOINT
+from ti_version import VersionJoint
 from ti_math import isfinite
 from ti_pointtransform import PointTransf
 from ti_signalspec import SignalSpecParser
@@ -645,14 +646,15 @@ class TiminkTopLevelGElem(Elem):
         Check if this is a Timink top level 'g' element.
         """
         ok = False
-        versionRegexp = re.compile('^[0-9]+\.[0-9]+\.[0-9]$')
-        assert versionRegexp.match(VERSIONSTR)
-        assert not versionRegexp.match('')
         attribDict = self.getAttribs()
         if attribDict is not None:
             # only valid version is required
-            version = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_VERSION, '')
-            ok = versionRegexp.match(version)
+            versionStr = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_VERSION, '')
+            try:
+                version = VersionJoint(versionStr)
+                ok = True
+            except ValueError:
+                pass
             if beStrict:
                 signalSpec = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_SIGNALSPEC, '')
                 ok = ok and SignalSpecParser.isValid(signalSpec)
@@ -688,7 +690,7 @@ class TiminkTopLevelGElem(Elem):
         for a in removedAttribSet:
             del self._node.attrib['{%s}%s' % (NSS['timink'], a)]
             del attribDict[a]
-        attribDict[TiminkTopLevelGElem._ATTRIBNAME_VERSION]    = VERSIONSTR
+        attribDict[TiminkTopLevelGElem._ATTRIBNAME_VERSION]    = str(VERSIONJOINT)
         attribDict[TiminkTopLevelGElem._ATTRIBNAME_SIGNALSPEC] = signalSpec
         attribDict[TiminkTopLevelGElem._ATTRIBNAME_USRPARAMS]  = usrParams.toStr()
         for a, v in attribDict.iteritems():
@@ -696,6 +698,17 @@ class TiminkTopLevelGElem(Elem):
         for a in attribDict.keys():
             self._node.attrib['{%s}%s' % (NSS['timink'], a)] = attribDict[a]
         return removedAttribSet
+
+    def getVersionJoint(self):
+        versionJoint = None
+        attribDict = self.getAttribs()
+        if attribDict is not None:
+            try:
+                versionStr = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_VERSION, '')
+                versionJoint = VersionJoint(versionStr)
+            except ValueError:
+                pass
+        return versionJoint
 
     def getSignalSpec(self):
         signalSpec = None

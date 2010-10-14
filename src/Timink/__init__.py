@@ -78,7 +78,7 @@ import re
 import inkex
 
 from ti_math import isfinite
-from ti_base import EXTENSION_NAME, VERSIONSTR
+from ti_info import EXTENSION_NAME, VERSIONJOINT
 from ti_signalspec import SignalSpec, SignalSpecParser
 from ti_pointtransform import PointTransf
 from ti_elem import Elem, PathElem, TiminkSignalGElem, TiminkTopLevelGElem
@@ -305,10 +305,12 @@ class Timink(inkex.Effect):
             del so, sg
 
             signalSpecStr = ''
+            versionJoint = None
             usrParams = UsrParams()
             if selectedGroup is not None:
                 selectedGroup = TiminkTopLevelGElem(selectedGroup)
                 signalSpecStr = selectedGroup.getSignalSpec()
+                versionJoint = selectedGroup.getVersionJoint()
                 r = UsrParams.parseStr(selectedGroup.getUsrParams())
                 if r is not None:
                     usrParams, invalidKeys, unsupportedParamKeys = r
@@ -326,7 +328,7 @@ class Timink(inkex.Effect):
                 sgDict = selectedGroup.getSignalGroups()
                 sgInfoDict, signalOriginDict, wasteElemDict = self.analyzeExistingSignalGroups(sgDict)
 
-            r = GUISignalSpecEditor(signalSpecStr, usrParams,
+            r = GUISignalSpecEditor(signalSpecStr, usrParams, versionJoint,
                                     len(signalSpecStr) == 0,
                                     len(signalOriginDict) > 1).run()
 
