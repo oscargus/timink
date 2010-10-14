@@ -125,7 +125,7 @@ class Timink(inkex.Effect):
 
             sgInfo = oldSignalGroup.getCategorizedPaths()
             if sgInfo is not None:
-                # use??? existing signal group, (re)use transform and style
+                # (re)use transform and style of existing signal group
                 oldSignalPaths, oldShading, wastePaths = sgInfo
                 for wp in wastePaths:
                     # all but the first element to be removed
@@ -136,10 +136,9 @@ class Timink(inkex.Effect):
 
                 # Determine path origin (only from signal group).
                 # The 'transform' attribute of signal paths should be cleared later.
-                oldSignalOrigin = oldSignalGroup.getTransform().applyTo((0, 0))
-                if oldSignalOrigin is not None:
-                    signalOriginDict[signalIndex] =oldSignalOrigin
-                del oldSignalOrigin
+                oldSignalTransf = oldSignalGroup.getTransform()
+                if oldSignalTransf is not None:
+                    signalOriginDict[signalIndex] = oldSignalTransf.applyTo((0, 0))
 
             del oldSignalGroup
             del sgInfo
@@ -166,14 +165,14 @@ class Timink(inkex.Effect):
                     del signalOriginDict[signalIndex]
                 if signalIndex in wasteElemDict:
                     del wasteElemDict[signalIndex]
-                printInfo('Signal %d: Removed all SVG elements (no longer in signal specification).' % signalIndex)
+                printInfo('Signal {si}: Removed all SVG elements (no longer in signal specification).'.format(si=signalIndex))
 
         for signalIndex in sorted(wasteElemDict.keys()):
             for we in wasteElemDict[signalIndex]:
                 assert we is not None
                 we.remove()
                 escapedTag = escapeStringForUser(we.getNode().tag)
-                printInfo('Signal %d: Removed waste %s element.' % (signalIndex, escapedTag))
+                printInfo('Signal {si}: Removed waste {et} element.'.format(si=signalIndex, et=escapedTag))
 
         return (sgInfoDict, signalOriginDict, wasteElemDict)
 
@@ -310,6 +309,8 @@ class Timink(inkex.Effect):
             if selectedGroup is not None:
                 selectedGroup = TiminkTopLevelGElem(selectedGroup)
                 signalSpecStr = selectedGroup.getSignalSpec()
+                if signalSpecStr is None:
+                    signalSpecStr = ''
                 versionJoint = selectedGroup.getVersionJoint()
                 r = UsrParams.parseStr(selectedGroup.getUsrParams())
                 if r is not None:
@@ -383,16 +384,21 @@ class Timink(inkex.Effect):
                     assert signalSpec is not None
                     pathVerticesList, shading01VerticesList = signalSpec.getAllPathVerticesAndShading(edgeTimeWidth)
                     pathNo = len(pathVerticesList)
-                    assert pathNo > 0 # ???
 
-                    # remove 'transform' of signal path
+                    # remove 'transform' of signal path and shading path
                     hadWasteTransf = False
                     for signalPath in signalPaths:
-                        if not signalPath.getTransform().isIdentity():
-                           signalPath.setTransform(PointTransf.createIdentity())
+                        transf = signalPath.getTransform()
+                        if transf is None or not transf.isIdentity():
+                           signalPath.setTransform(None)
+                           hadWasteTransf = True
+                    if shading is not None:
+                        transf = shading.getTransform()
+                        if transf is None or not transf.isIdentity():
+                           signalPath.setTransform(None)
                            hadWasteTransf = True
                     if hadWasteTransf:
-                        printInfo('Signal %d: Removed interfering "transform" attribute from "path".' % signalIndex)
+                        printInfo('Signal {si}: Removed interfering \'transform\' attribute from \'path\' element.'.format(si=signalIndex))
                     del hadWasteTransf
 
                     signalPaths = signalPaths + [None] * (pathNo - len(signalPaths))
@@ -403,11 +409,15 @@ class Timink(inkex.Effect):
                         signalGroup.setTransform(PointTransf.createTransl(signalOrigin))
                     else:
                         transf = signalGroup.getTransform()
-                        oldSignalOrigin = transf.applyTo((0, 0))
-                        originDiff = (signalOrigin[0] - oldSignalOrigin[0], signalOrigin[1] - oldSignalOrigin[1])
-                        if originDiff != (0.0, 0.0):
-                            transf = PointTransf.createConcat(transf, PointTransf.createTransl(originDiff))
-                            signalGroup.setTransform(transf)
+                        if transf is None:
+                            signalGroup.setTransform(None)
+                            printInfo('Signal {si}: Removed invalid \'transform\' attribute from \'g\' element.'.format(si=signalIndex))
+                        else:
+                            oldSignalOrigin = transf.applyTo((0, 0))
+                            originDiff = (signalOrigin[0] - oldSignalOrigin[0], signalOrigin[1] - oldSignalOrigin[1])
+                            if originDiff != (0.0, 0.0):
+                                transf = PointTransf.createConcat(transf, PointTransf.createTransl(originDiff))
+                                signalGroup.setTransform(transf)
 
                     for pathIndex in range(0, pathNo):
                         pathVertices = pathVerticesList[pathIndex]
@@ -437,13 +447,13 @@ class Timink(inkex.Effect):
                             oldSignalPath.makeSiblingPredecessorOf(newSignalPath)
                             oldSignalPath.remove()
                             if newSignalPath.removeFill():
-                                printInfo('Signal %d: Did reset interfering fill style from \'path\' element to \'none\'.' % signalIndex)
+                                printInfo('Signal {si}: Did reset interfering fill style from \'path\' element to \'none\'.'.format(si=signalIndex))
                             if newSignalPath.forceVisibleStroke():
-                                printInfo('Signal %d: Did reset invisible stroke style from \'path\' element to \'black\'.' % signalIndex)
+                                printInfo('Signal {si}: Did reset invisible stroke style from \'path\' element to \'black\'.'.format(si=signalIndex))
                             if tg.removeStyle():
                                 # possible, because assigning a style to a group in Inkscape
                                 # sets the style of all contained elements (all levels below)
-                                printInfo('Signal %d: Did remove interfering style from \'g\' element.' % signalIndex)
+                                printInfo('Signal {si}: Did remove interfering style from \'g\' element.'.format(si=signalIndex))
                         # replace all transforms by transform of signal path 0
                         if pathIndex > 0:
                             newSignalPath.copyTransformFrom(signalPaths[0])
@@ -471,7 +481,7 @@ class Timink(inkex.Effect):
                     shading = newShading
                     shading.copyTransformFrom(signalPaths[0])
                     if shading.removeStroke():
-                        printInfo('Signal %d: Did reset stroke style from shading \'path\' element to \'none\'.' % signalIndex)
+                        printInfo('Signal {si}: Did reset stroke style from shading \'path\' element to \'none\'.'.format(si=signalIndex))
 
                     # sort signal path elements (drawing order)
                     existingSignalPaths = filter(lambda e: e is not None, signalPaths)

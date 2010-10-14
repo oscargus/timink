@@ -104,11 +104,11 @@ class Elem:
         if transform is not None and not transform.isIdentity():
             if transform.m == (1, 0, 0, 1):
                 # translation only
-                transformAttrib = 'translate(%s, %s)' % (str(transform.o[0]), str(transform.o[1]))
+                transformAttrib = 'translate({tx},{ty})'.format(tx=transform.o[0], ty=transform.o[1])
             else:
                 m11, m12, m21, m22 = transform.m
                 oX, oY = transform.o
-                transformAttrib = 'matrix(%s)' % ', '.join(map(str, [m11, m21, m12, m22, oX, oY]))
+                transformAttrib = 'matrix({m})'.format(m=','.join(map(str, [m11, m21, m12, m22, oX, oY])))
         if transformAttrib is not None:
             self._node.attrib['transform'] = transformAttrib
         elif 'transform' in self._node.attrib:
@@ -416,9 +416,9 @@ class PathElem(Elem):
                 else:
                     partPathSpec = partPathSpec + ' L'
                 assert isfinite(x) and isfinite(y)
-                partPathSpec = partPathSpec + ' %s,%s' % (str(startPointX + x), str(startPointY + yScale * y))
+                partPathSpec = partPathSpec + ' {x},{y}'.format(x=startPointX + x, y=startPointY + yScale * y)
             if startPoint is not None and vertices[0] != (startPointX, startPointY):
-                partPathSpec = 'M %s,%s ' % (str(startPointX), str(startPointY)) + partPathSpec
+                partPathSpec = 'M {x},{y} '.format(x=startPointX, y=startPointY) + partPathSpec
             if doClose:
                 partPathSpec = partPathSpec + ' Z'
             pathSpecs.append(partPathSpec)
@@ -547,7 +547,7 @@ class TiminkSignalGElem(Elem):
         parentNode = Elem(parentNode).getNode()
         assert parentNode is not None
         assert signalIndex >= 0
-        label = (TiminkSignalGElem._LABEL_SIGNALGROUP + '%d') %  signalIndex
+        label = TiminkSignalGElem._LABEL_SIGNALGROUP + str(signalIndex)
         signalGroup = TiminkSignalGElem(inkex.etree.SubElement(parentNode, inkex.addNS('g','svg')))
         signalGroup.setLabel(label)
         return signalGroup
@@ -576,7 +576,7 @@ class TiminkSignalGElem(Elem):
         styleDict = {'stroke': 'black', 'fill': 'none'}
         p = PathElem.addCombinedLines(self._node, verticesList, yScale, (startPointX, startPointY),
                                       styleDict, False)
-        p.setLabel((TiminkSignalGElem._LABEL_SIGNALPATH + '%d') % pathIndex)
+        p.setLabel(TiminkSignalGElem._LABEL_SIGNALPATH + str(pathIndex))
         return p
 
     def addShadingPath(self, verticesList, yScale, (startPointX, startPointY)):
@@ -633,7 +633,7 @@ class TiminkTopLevelGElem(Elem):
         attribDict = dict()
         try:
             for a, v in self._node.attrib.iteritems():
-                prefix = '{%s}' % NSS['timink']
+                prefix = '{{{ns}}}'.format(ns=NSS['timink'])
                 if a.startswith(prefix):
                     an = a[len(prefix):]
                     attribDict[an] = v.decode('string-escape').decode('utf-8')
@@ -688,7 +688,7 @@ class TiminkTopLevelGElem(Elem):
         attribDict = self._getAttribs()
         removedAttribSet = set(attribDict.keys()) - TiminkTopLevelGElem._ATTRIBNAMESET
         for a in removedAttribSet:
-            del self._node.attrib['{%s}%s' % (NSS['timink'], a)]
+            del self._node.attrib['{{{ns}}}{a}'.format(ns=NSS['timink'], a=a)]
             del attribDict[a]
         attribDict[TiminkTopLevelGElem._ATTRIBNAME_VERSION]    = str(VERSIONJOINT)
         attribDict[TiminkTopLevelGElem._ATTRIBNAME_SIGNALSPEC] = signalSpec
@@ -696,7 +696,7 @@ class TiminkTopLevelGElem(Elem):
         for a, v in attribDict.iteritems():
             attribDict[a] = v.encode('utf-8').encode('string-escape')
         for a in attribDict.keys():
-            self._node.attrib['{%s}%s' % (NSS['timink'], a)] = attribDict[a]
+            self._node.attrib['{{{ns}}}{a}'.format(ns=NSS['timink'], a=a)] = attribDict[a]
         return removedAttribSet
 
     def getVersionJoint(self):
