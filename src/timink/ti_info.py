@@ -31,4 +31,4 @@ EXTENSION_NAME = 'Timink'
 #     If one of the elements or attributes is removed are has a different meaning:
 #         Increase <major> and set <minor> to 0.
 
-VERSIONJOINT = VersionJoint('0.0.1/0.0')
+VERSIONJOINT = VersionJoint('0.1.0/1.0')
