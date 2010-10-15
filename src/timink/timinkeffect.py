@@ -87,7 +87,7 @@ from ti_gui import escapeStringForUser, printInfo, UserError
 from ti_gui import showErrorDlg, SignalClusterEditor
 
 
-class Timink(inkex.Effect):
+class TiminkEffect(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
@@ -289,7 +289,7 @@ class Timink(inkex.Effect):
 
 
     def effect(self):
-        """Perform the effect: create/modify Timink 'g' elements"""
+        """Perform the effect: create/modify Timink object (signal cluster group)."""
 
         selectedSignalClusterGroup, sg, so = SignalClusterGElem.getSelected(self.selected)
         try:
@@ -363,9 +363,9 @@ class Timink(inkex.Effect):
                 if len(signalOriginDict) == 0:
                     signalOriginDict[0] = centerOfView
                 if len(signalOriginDict) <= 1 or usrParams.placementMethod == u'homogeneous':
-                    signalOriginDict = Timink.completeOriginsHomog(signalOriginDict, len(signalSpecStrs), (originDistX, originDistY))
+                    signalOriginDict = TiminkEffect.completeOriginsHomog(signalOriginDict, len(signalSpecStrs), (originDistX, originDistY))
                 else:
-                    signalOriginDict = Timink.completeOriginsByInterp(signalOriginDict, len(signalSpecStrs))
+                    signalOriginDict = TiminkEffect.completeOriginsByInterp(signalOriginDict, len(signalSpecStrs))
                 del originDistX
                 del originDistY
 
@@ -525,24 +525,20 @@ class Timink(inkex.Effect):
 
     @staticmethod
     def testIt():
-        assert Timink.completeOriginsHomog(\
+        assert TiminkEffect.completeOriginsHomog(\
             {0: (100, 100)},
             1, (100, 1000)) \
             == {0: (100.0, 100.0)}
-        assert Timink.completeOriginsHomog(\
+        assert TiminkEffect.completeOriginsHomog(\
             {0: (100, 100)},
             2, (100, 1000)) \
             == {0: (100.0, 100.0), 1: (200.0, 1100.0)}
-        assert Timink.completeOriginsHomog(\
+        assert TiminkEffect.completeOriginsHomog(\
             {1: (100, 100)},
             2, (100, 1000)) \
             == {0: (0.0, -900.0), 1: (100.0, 100.0)}
-        assert Timink.completeOriginsByInterp(\
+        assert TiminkEffect.completeOriginsByInterp(\
             {1: (200, 200), 2: (300, 300), 4: (0, 400)}, 7) \
             == {0: (100.0, 100.0), 1: (200, 200), 2: (300, 300), 3: (150.0, 350.0),
                 4: (0, 400), 5: (-150.0, 450.0), 6: (-300.0, 500.0)}
 
-
-Timink.testIt()
-e = Timink()
-e.affect()
