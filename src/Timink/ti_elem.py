@@ -22,7 +22,7 @@ from ti_info import VERSIONJOINT
 from ti_version import VersionJoint
 from ti_math import isfinite
 from ti_pointtransform import PointTransf
-from ti_signalspec import SignalSpecParser
+from ti_signalspec import SignalClusterSpecParser
 from ti_usrparams import UsrParams
 
 NSS = inkex.NSS
@@ -31,7 +31,7 @@ NSS['timink'] = u"http://timink.sourceforge.net/"
 
 class Elem:
     """
-    Helper for handling of 'path' elements.
+    XML element.
     """
 
     def __init__(self, node):
@@ -344,7 +344,7 @@ class Elem:
 
 class PathElem(Elem):
     """
-    Helper for handling of 'path' elements.
+    XML 'path' element.
     """
 
     def __init__(self, node):
@@ -432,9 +432,9 @@ class PathElem(Elem):
         return PathElem(inkex.etree.SubElement(parentNode, inkex.addNS('path','svg'), attribs))
 
 
-class TiminkSignalGElem(Elem):
+class SignalGElem(Elem):
     """
-    Helper for handling of signal groups ('g' elements representing a signal) created by Timink.
+    XML element representing a signal group.
 
     A signal group can contain any number of elements, but the following elements are
     treated specially:
@@ -459,10 +459,10 @@ class TiminkSignalGElem(Elem):
         """
         index = None
         if self._node is not None and self._node.tag == inkex.addNS('g','svg'):
-            if not TiminkTopLevelGElem(self._node).isValid():
+            if not SignalClusterGElem(self._node).isValid():
                 label = self.getLabel()
                 if label is not None:
-                    regexpStr = '^' + re.escape(TiminkSignalGElem._LABEL_SIGNALGROUP) + '(0|[1-9][0-9]*)$'
+                    regexpStr = '^' + re.escape(SignalGElem._LABEL_SIGNALGROUP) + '(0|[1-9][0-9]*)$'
                     m = re.match(regexpStr, label)
                     if m is not None:
                         index = int(m.group(1))
@@ -490,7 +490,7 @@ class TiminkSignalGElem(Elem):
     @staticmethod
     def _getSignalPathIndexOfLabel(label):
         index = None
-        regexpStr = '^' + re.escape(TiminkSignalGElem._LABEL_SIGNALPATH) + '(0|[1-9][0-9]*)$'
+        regexpStr = '^' + re.escape(SignalGElem._LABEL_SIGNALPATH) + '(0|[1-9][0-9]*)$'
         m = re.match(regexpStr, label)
         if m is not None:
             index = int(m.group(1))
@@ -517,12 +517,12 @@ class TiminkSignalGElem(Elem):
             wasteSignalPaths = []
             if pathNodeDict is not None:
                 for label, nodes in pathNodeDict.iteritems():
-                    if label == TiminkSignalGElem._LABEL_SHADINGPATH:
+                    if label == SignalGElem._LABEL_SHADINGPATH:
                         shadingPath = nodes[0]
                         if len(nodes) > 1:
                             wasteSignalPaths.extend(nodes[1:])
                     else:
-                        pathIndex = TiminkSignalGElem._getSignalPathIndexOfLabel(label)
+                        pathIndex = SignalGElem._getSignalPathIndexOfLabel(label)
                         if pathIndex is not None:
                             # all elements of nodes are signal paths
                             signalPathNodeDict[pathIndex] = nodes[0]
@@ -547,8 +547,8 @@ class TiminkSignalGElem(Elem):
         parentNode = Elem(parentNode).getNode()
         assert parentNode is not None
         assert signalIndex >= 0
-        label = TiminkSignalGElem._LABEL_SIGNALGROUP + str(signalIndex)
-        signalGroup = TiminkSignalGElem(inkex.etree.SubElement(parentNode, inkex.addNS('g','svg')))
+        label = SignalGElem._LABEL_SIGNALGROUP + str(signalIndex)
+        signalGroup = SignalGElem(inkex.etree.SubElement(parentNode, inkex.addNS('g','svg')))
         signalGroup.setLabel(label)
         return signalGroup
 
@@ -575,7 +575,7 @@ class TiminkSignalGElem(Elem):
 
         styleDict = {'stroke': 'black', 'fill': 'none'}
         p = PathElem.addCombinedLines(self._node, verticesList, yScale, startPoint, styleDict, False)
-        p.setLabel(TiminkSignalGElem._LABEL_SIGNALPATH + str(pathIndex))
+        p.setLabel(SignalGElem._LABEL_SIGNALPATH + str(pathIndex))
         return p
 
     def addShadingPath(self, verticesList, yScale, startPoint):
@@ -591,7 +591,7 @@ class TiminkSignalGElem(Elem):
         If startPoint is None, all vertex positions are calculated
         as (x + startPointX, yScale * y + startPointY).
 
-        If startPoint is not None???, the first -- probably invisible -- point of the resulting path
+        If startPoint is not None, the first -- probably invisible -- point of the resulting path
         is startPoint.
         """
         assert self._node is not None
@@ -600,22 +600,22 @@ class TiminkSignalGElem(Elem):
 
         styleDict = {'stroke': 'none', 'fill': 'black', 'fill-opacity': '0.25'}
         p = PathElem.addCombinedLines(self._node, verticesList, yScale, startPoint, styleDict, True)
-        p.setLabel(TiminkSignalGElem._LABEL_SHADINGPATH)
+        p.setLabel(SignalGElem._LABEL_SHADINGPATH)
         return p
 
 
-class TiminkTopLevelGElem(Elem):
+class SignalClusterGElem(Elem):
     """
-    Helper for handling of top-level group ('g' element created by Timink).
+    XML element representing a signal cluster (top-level 'g' element created by Timink).
     """
 
-    # element names of top-level group
-    _ATTRIBNAME_VERSION    = u'version'
-    _ATTRIBNAME_SIGNALSPEC = u'signalspec'
-    _ATTRIBNAME_USRPARAMS  = u'usrparams'
+    # element names of signal cluster group
+    _ATTRIBNAME_VERSION           = u'version'
+    _ATTRIBNAME_SIGNALCLUSTERSPEC = u'signalclusterspec'
+    _ATTRIBNAME_USRPARAMS         = u'usrparams'
     _ATTRIBNAMESET = set([
         _ATTRIBNAME_VERSION,
-        _ATTRIBNAME_SIGNALSPEC,
+        _ATTRIBNAME_SIGNALCLUSTERSPEC,
         _ATTRIBNAME_USRPARAMS
     ])
 
@@ -641,30 +641,30 @@ class TiminkTopLevelGElem(Elem):
 
     def isValid(self, beStrict=False):
         """
-        Check if this is a Timink top level 'g' element.
+        Check if this is a signal cluster group element.
         """
         ok = False
         attribDict = self.getAttribs()
         if attribDict is not None:
             # only valid version is required
-            versionStr = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_VERSION, '')
+            versionStr = attribDict.get(SignalClusterGElem._ATTRIBNAME_VERSION, '')
             try:
                 version = VersionJoint(versionStr)
                 ok = True
             except ValueError:
                 pass
             if beStrict:
-                signalSpec = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_SIGNALSPEC, '')
-                ok = ok and SignalSpecParser.isValid(signalSpec)
-                usrParams = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_USRPARAMS, '')
+                signalClusterSpecStr = attribDict.get(SignalClusterGElem._ATTRIBNAME_SIGNALCLUSTERSPEC, '')
+                ok = ok and SignalClusterSpecParser.isValid(signalClusterSpecStr)
+                usrParams = attribDict.get(SignalClusterGElem._ATTRIBNAME_USRPARAMS, '')
                 usrParams = UsrParams.fromStr(usrParams)
                 ok = ok and usrParams is not None and usrParams.isValid()
         return ok
 
     def getAttribs(self):
         """
-        Returns the Timink specific attributes, assuming that this node is the top
-        'g' element generated by Timink.
+        Returns the Timink specific attributes, assuming that this node is a signal cluster group
+        element generated by Timink.
         Returns None, if there is an error in the encoding of an attribute.
         """
         attribDict = None
@@ -673,24 +673,24 @@ class TiminkTopLevelGElem(Elem):
             attribDict = self._getAttribs()
         return attribDict
 
-    def setAttribs(self, signalSpec, usrParams):
+    def setAttribs(self, signalClusterSpecStr, usrParams):
         """
         Sets the value of all Timink specific attributes for this node.
 
-        signalSpec: valid signal specification
+        signalClusterSpecStr: valid signal cluster specification
         usrParams:  valid user params
         """
         assert self._node is not None
-        assert SignalSpecParser.isValid(signalSpec)
+        assert SignalClusterSpecParser.isValid(signalClusterSpecStr)
         assert usrParams is not None and usrParams.isValid()
         attribDict = self._getAttribs()
-        removedAttribSet = set(attribDict.keys()) - TiminkTopLevelGElem._ATTRIBNAMESET
+        removedAttribSet = set(attribDict.keys()) - SignalClusterGElem._ATTRIBNAMESET
         for a in removedAttribSet:
             del self._node.attrib['{{{ns}}}{a}'.format(ns=NSS['timink'], a=a)]
             del attribDict[a]
-        attribDict[TiminkTopLevelGElem._ATTRIBNAME_VERSION]    = str(VERSIONJOINT)
-        attribDict[TiminkTopLevelGElem._ATTRIBNAME_SIGNALSPEC] = signalSpec
-        attribDict[TiminkTopLevelGElem._ATTRIBNAME_USRPARAMS]  = usrParams.toStr()
+        attribDict[SignalClusterGElem._ATTRIBNAME_VERSION]           = str(VERSIONJOINT)
+        attribDict[SignalClusterGElem._ATTRIBNAME_SIGNALCLUSTERSPEC] = signalClusterSpecStr
+        attribDict[SignalClusterGElem._ATTRIBNAME_USRPARAMS]         = usrParams.toStr()
         for a, v in attribDict.iteritems():
             attribDict[a] = v.encode('utf-8').encode('string-escape')
         for a in attribDict.keys():
@@ -702,44 +702,45 @@ class TiminkTopLevelGElem(Elem):
         attribDict = self.getAttribs()
         if attribDict is not None:
             try:
-                versionStr = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_VERSION, '')
+                versionStr = attribDict.get(SignalClusterGElem._ATTRIBNAME_VERSION, '')
                 versionJoint = VersionJoint(versionStr)
             except ValueError:
                 pass
         return versionJoint
 
-    def getSignalSpec(self):
-        signalSpec = None
+    def getSignalClusterSpec(self):
+        signalClusterSpecStr = None
         attribDict = self.getAttribs()
         if attribDict is not None:
-            signalSpec = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_SIGNALSPEC, signalSpec)
-        return signalSpec
+            signalClusterSpecStr = attribDict.get(SignalClusterGElem._ATTRIBNAME_SIGNALCLUSTERSPEC,
+                                                  signalClusterSpecStr)
+        return signalClusterSpecStr
 
     def getUsrParams(self):
         usrParams = None
         attribDict = self.getAttribs()
         if attribDict is not None:
-            usrParams = attribDict.get(TiminkTopLevelGElem._ATTRIBNAME_USRPARAMS, usrParams)
+            usrParams = attribDict.get(SignalClusterGElem._ATTRIBNAME_USRPARAMS, usrParams)
         return usrParams
 
     @staticmethod
     def getSelected(selectedNodeDict):
         """
-        Returns the selected top-level groups
-        (topTiminkGroup, selectedTiminkGroups, selectedOtherElems).
+        Returns the selected signal cluster groups
+        (commonSignalClusterGroup, selectedSignalClusterGroups, selectedOtherElems).
 
-        selectedTiminkGroups:
-            list of all top-level groups with selected elements (lowest level).
-        topTiminkGroup:
-            None or lowest level top-level group containing all elements
-            of selectedTiminkGroups.
+        selectedSignalClusterGroups:
+            list of all signal cluster groups with selected elements (lowest level).
+        commonSignalClusterGroup:
+            None or lowest level signal cluster group containing all elements
+            of selectedSignalClusterGroups.
         selectedOtherElems:
             list of all other selected elements.
         """
 
         def findLowestContaining(node):
             gnode = node
-            while gnode is not None and not TiminkTopLevelGElem(gnode).isValid():
+            while gnode is not None and not SignalClusterGElem(gnode).isValid():
                 gnode = gnode.getparent()
             return gnode # None if not found
 
@@ -763,31 +764,31 @@ class TiminkTopLevelGElem(Elem):
             else:
                 return None
 
-        selectedTiminkGroups = set()
+        selectedSignalClusterGroups = set()
         selectedOtherElems = []
         for key, node in selectedNodeDict.iteritems():
             gnode = findLowestContaining(node)
             if gnode is not None:
-                # found containing 'g' element generated by Timink
-                selectedTiminkGroups.add(gnode)
+                # found containing signal cluster group
+                selectedSignalClusterGroups.add(gnode)
             else:
-                # node is not contained in a 'g' element generated by Timink
+                # node is not contained in a signal cluster group
                 selectedOtherElems.append(node)
-        selectedTiminkGroups = list(selectedTiminkGroups)
-        topTiminkGroup = list(selectedTiminkGroups)
-        while len(topTiminkGroup) > 1:
-            # find common containing 'g' element generated by Timink
-            gnode = findLowestCommonParent(topTiminkGroup[0], topTiminkGroup[1])
+        selectedSignalClusterGroups = list(selectedSignalClusterGroups)
+        commonSignalClusterGroup = list(selectedSignalClusterGroups)
+        while len(commonSignalClusterGroup) > 1:
+            # find common containing signal cluster group
+            gnode = findLowestCommonParent(commonSignalClusterGroup[0], commonSignalClusterGroup[1])
             gnode = findLowestContaining(gnode)
-            del topTiminkGroup[0:2]
+            del commonSignalClusterGroup[0:2]
             if gnode is not None:
-                # replace by common parent 'g' element
-                topTiminkGroup.append(gnode)
-        if len(topTiminkGroup) > 0:
-            topTiminkGroup = topTiminkGroup[0]
+                # replace by common parent signal cluster group
+                commonSignalClusterGroup.append(gnode)
+        if len(commonSignalClusterGroup) > 0:
+            commonSignalClusterGroup = commonSignalClusterGroup[0]
         else:
-            topTiminkGroup = None
-        return (topTiminkGroup, selectedTiminkGroups, selectedOtherElems)
+            commonSignalClusterGroup = None
+        return (commonSignalClusterGroup, selectedSignalClusterGroups, selectedOtherElems)
 
     def getSignalGroups(self):
         """
@@ -795,27 +796,27 @@ class TiminkTopLevelGElem(Elem):
         of None is this node is None.
 
         key:   signal index (>= 0)
-        value: TiminkSignalGElem object (!= None) with getNode().getparent() != None
+        value: SignalGElem object (!= None) with getNode().getparent() != None
         """
         signalGroupsDict = None
         if self._node is not None:
             signalGroupsDict = dict()
             for child in self._node.iterchildren():
-                i = TiminkSignalGElem(child).getSignalIndex()
+                i = SignalGElem(child).getSignalIndex()
                 if i is not None:
-                    signalGroupsDict[i] = signalGroupsDict.get(i, []) + [TiminkSignalGElem(child)]
+                    signalGroupsDict[i] = signalGroupsDict.get(i, []) + [SignalGElem(child)]
         return signalGroupsDict
 
     @staticmethod
-    def addEmpty(parentNode, signalSpec, usrParams):
+    def addEmpty(parentNode, signalClusterSpecStr, usrParams):
         """
-        Adds an empty (without child nodes) Timink top-level group element and returns the new node.
+        Adds an empty (without child nodes) signal cluster group element and returns the new node.
         """
         parentNode = Elem(parentNode).getNode()
-        assert SignalSpecParser.isValid(signalSpec)
+        assert SignalClusterSpecParser.isValid(signalClusterSpecStr)
         assert usrParams is not None and usrParams.isValid()
-        signalGroup = TiminkTopLevelGElem(inkex.etree.SubElement(parentNode, inkex.addNS('g','svg')))
-        removedAttribSet = signalGroup.setAttribs(signalSpec, usrParams)
+        signalGroup = SignalClusterGElem(inkex.etree.SubElement(parentNode, inkex.addNS('g','svg')))
+        removedAttribSet = signalGroup.setAttribs(signalClusterSpecStr, usrParams)
         assert len(removedAttribSet) == 0
         assert signalGroup.isValid(True)
         return signalGroup

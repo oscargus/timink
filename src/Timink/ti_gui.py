@@ -29,7 +29,7 @@ except ImportError:
 from ti_info import EXTENSION_NAME, VERSIONJOINT
 from ti_version import VersionJoint
 from ti_math import isfinite
-from ti_signalspec import SignalSpecParser
+from ti_signalspec import SignalClusterSpecParser
 from ti_usrparams import UsrParams
 
 class UserError(Exception):
@@ -178,24 +178,24 @@ class LengthEditor(object):
         self.unitCombo.set_sensitive(sensitive)
 
 
-class GUISignalSpecEditor(object):
-    """Editor for signal specification and user parameters."""
+class SignalClusterEditor(object):
+    """Editor for signal cluster specification and user parameters."""
 
-    def __init__(self, signalSpecStr, usrParams, existingVersionJoint, isNew, hasPositions):
+    def __init__(self, signalClusterSpecStr, usrParams, existingVersionJoint, isNew, hasPositions):
         assert usrParams is not None
         assert usrParams.isValid()
 
-        if signalSpecStr is None:
-            signalSpecStr = u''
-        if not isinstance(signalSpecStr, unicode):
-            signalSpecStr = unicode(signalSpecStr, errors='replace')
-        self.signalSpecStr = signalSpecStr
+        if signalClusterSpecStr is None:
+            signalClusterSpecStr = u''
+        if not isinstance(signalClusterSpecStr, unicode):
+            signalClusterSpecStr = unicode(signalClusterSpecStr, errors='replace')
+        self.signalClusterSpecStr = signalClusterSpecStr
         self.usrParams = usrParams
         self.existingVersionJoint = existingVersionJoint
         self.isNew = isNew
         self.hasPositions = hasPositions
 
-        self.signalSpecTextView = None
+        self.signalClusterSpecTextView = None
         self.unitTimeWidthEditor = None
         self.signalHeightEditor = None
         self.edgeTimeWidthEditor = None
@@ -203,22 +203,22 @@ class GUISignalSpecEditor(object):
         self.originDistXEditor = None
         self.originDistYEditor = None
 
-    def _createSignalSpecPage(self):
-        signalSpecScroll = gtk.ScrolledWindow()
-        signalSpecScroll.set_border_width(6)
-        signalSpecScroll.set_shadow_type(gtk.SHADOW_IN)
-        signalSpecScroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        signalSpecTextView = gtk.TextView()
-        signalSpecTextView.set_accepts_tab(False)
-        signalSpecTextView.modify_font(pango.FontDescription(u'monospace'))
-        signalSpecTextView.set_tooltip_text(
-            u'Signal specification.\n' +
+    def _createSignalClusterSpecPage(self):
+        signalClusterSpecScroll = gtk.ScrolledWindow()
+        signalClusterSpecScroll.set_border_width(6)
+        signalClusterSpecScroll.set_shadow_type(gtk.SHADOW_IN)
+        signalClusterSpecScroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        signalClusterSpecTextView = gtk.TextView()
+        signalClusterSpecTextView.set_accepts_tab(False)
+        signalClusterSpecTextView.modify_font(pango.FontDescription(u'monospace'))
+        signalClusterSpecTextView.set_tooltip_text(
+            u'Signal cluster specification.\n' +
              'Each line containing at least one state character ("0", "1", "-", "x", "X" etc.) ' +
              'represents one signal. Spaces are ignored.')
-        signalSpecTextView.get_buffer().set_text(self.signalSpecStr)
-        signalSpecScroll.add(signalSpecTextView)
-        signalSpecTextView.show()
-        signalSpecScroll.show()
+        signalClusterSpecTextView.get_buffer().set_text(self.signalClusterSpecStr)
+        signalClusterSpecScroll.add(signalClusterSpecTextView)
+        signalClusterSpecTextView.show()
+        signalClusterSpecScroll.show()
 
         exampleLabel = gtk.Label(
             u'01010101 00110011 000111000111 00001111\n' +
@@ -238,14 +238,14 @@ class GUISignalSpecEditor(object):
         exampleExpander.add(exampleFrame)
         exampleExpander.show()
 
-        signalSpecPageVBox = gtk.VBox()
-        signalSpecPageVBox.pack_start(signalSpecScroll, expand=True, fill=True)
-        signalSpecPageVBox.pack_start(exampleExpander, expand=False, fill=True)
-        signalSpecPageVBox.show()
+        signalClusterSpecPageVBox = gtk.VBox()
+        signalClusterSpecPageVBox.pack_start(signalClusterSpecScroll, expand=True, fill=True)
+        signalClusterSpecPageVBox.pack_start(exampleExpander, expand=False, fill=True)
+        signalClusterSpecPageVBox.show()
 
-        self.signalSpecTextView = signalSpecTextView
+        self.signalClusterSpecTextView = signalClusterSpecTextView
 
-        return signalSpecPageVBox
+        return signalClusterSpecPageVBox
 
     def _createLayoutPage(self):
         table = gtk.Table(rows=2, columns=3, homogeneous=False)
@@ -411,9 +411,10 @@ class GUISignalSpecEditor(object):
     def run(self):
         """
         Returns a None -- if the user pressed 'Cancel' -- or
-        (signalSpec, usrParams)  -- if the user pressed 'Ok'.
+        (signalClusterSpecStr, usrParams)  -- if the user pressed 'Ok'.
 
-        signalSpec is a valid signal specification and usrParams is a valid UsrParams object.
+        signalClusterSpecStr is a valid signal cluster specification
+        and usrParams is a valid UsrParams object.
         """
 
         dlgTitle = unicode(EXTENSION_NAME) + ' ' + unicode(VERSIONJOINT.extension)
@@ -427,9 +428,9 @@ class GUISignalSpecEditor(object):
             dlg.add_button(gtk.STOCK_APPLY, gtk.RESPONSE_ACCEPT)
 
         paramNotebook = gtk.Notebook()
-        signalSpecPage = self._createSignalSpecPage()
-        signalSpecPageIndex = paramNotebook.append_page(signalSpecPage, gtk.Label(u'Signal spec.'))
-        del signalSpecPage
+        signalClusterSpecPage = self._createSignalClusterSpecPage()
+        signalClusterSpecPageIndex = paramNotebook.append_page(signalClusterSpecPage, gtk.Label(u'Signal cluster'))
+        del signalClusterSpecPage
         layoutPage = self._createLayoutPage()
         layoutPageIndex = paramNotebook.append_page(layoutPage, gtk.Label(u'Layout'))
         del layoutPage
@@ -440,18 +441,18 @@ class GUISignalSpecEditor(object):
             dlg.vbox.pack_start(warningArea, expand=False, fill=False)
         dlg.vbox.pack_start(paramNotebook, expand=True, fill=True, padding=6)
 
-        signalSpec = None
+        signalClusterSpecStr = None
         usrParams = None
 
         ok = False
 
-        self.signalSpecTextView.grab_focus()
+        self.signalClusterSpecTextView.grab_focus()
         response = dlg.run()
         while response == gtk.RESPONSE_ACCEPT:
 
-            textBuffer = self.signalSpecTextView.get_buffer()
-            signalSpec = textBuffer.get_text(textBuffer.get_start_iter(), textBuffer.get_end_iter())
-            signalSpec = signalSpec.decode('utf-8')
+            textBuffer = self.signalClusterSpecTextView.get_buffer()
+            signalClusterSpecStr = textBuffer.get_text(textBuffer.get_start_iter(), textBuffer.get_end_iter())
+            signalClusterSpecStr = signalClusterSpecStr.decode('utf-8')
 
             usrParams = UsrParams()
             usrParams.unitTimeWidth = self.unitTimeWidthEditor.getLengthValue()
@@ -465,16 +466,16 @@ class GUISignalSpecEditor(object):
                 usrParams.placementMethod = u'individual'
 
             ok = True
-            if not SignalSpecParser.isValid(signalSpec):
+            if not SignalClusterSpecParser.isValid(signalClusterSpecStr):
 
-                invCharPosList = SignalSpecParser.getInvalidCharPos(signalSpec)
-                nonmatchingParenthesisIndex = SignalSpecParser.getFirstNonmatchingParenthesis(signalSpec)
-                invMultiStateRange = SignalSpecParser.getFirstInvalidMultiPathState(signalSpec)
+                invCharPosList = SignalClusterSpecParser.getInvalidCharPos(signalClusterSpecStr)
+                nonmatchingParenthesisIndex = SignalClusterSpecParser.getFirstNonmatchingParenthesis(signalClusterSpecStr)
+                invMultiStateRange = SignalClusterSpecParser.getFirstInvalidMultiPathState(signalClusterSpecStr)
                 if len(invCharPosList) > 0:
-                    showErrorDlg(u'Invalid character in signal specification.',
+                    showErrorDlg(u'Invalid character in signal cluster specification.',
                                  u'The valid characters are:\n'
                                + u'white spaces, "0", "1", "-", "x", "X", "y", "Y", "(",  ")", "[", "]')
-                    assert invCharPosList[0] < len(signalSpec)
+                    assert invCharPosList[0] < len(signalClusterSpecStr)
                     i = invCharPosList[0]
                     j = i + 1
                     while j in invCharPosList:
@@ -496,11 +497,11 @@ class GUISignalSpecEditor(object):
                     selEnd = textBuffer.get_iter_at_offset(invMultiStateRange[1])
                     textBuffer.select_range(selStart, selEnd)
                 else:
-                    showErrorDlg(u'Please enter a signal specification.')
-                self.signalSpecTextView.scroll_mark_onscreen(textBuffer.get_insert())
-                paramNotebook.set_current_page(signalSpecPageIndex)
-                self.signalSpecTextView.grab_focus()
-                signalSpec = None
+                    showErrorDlg(u'Please enter a signal cluster specification.')
+                self.signalClusterSpecTextView.scroll_mark_onscreen(textBuffer.get_insert())
+                paramNotebook.set_current_page(signalClusterSpecPageIndex)
+                self.signalClusterSpecTextView.grab_focus()
+                signalClusterSpecStr = None
                 ok = False
 
             elif not usrParams.isValid():
@@ -511,7 +512,7 @@ class GUISignalSpecEditor(object):
                 ok = False
 
             if ok:
-                signalSpec = SignalSpecParser.cleanUp(signalSpec)
+                signalClusterSpecStr = SignalClusterSpecParser.cleanUp(signalClusterSpecStr)
                 break
             else:
                 response = dlg.run()
@@ -522,9 +523,9 @@ class GUISignalSpecEditor(object):
 
         r = None
         if ok:
-            assert SignalSpecParser.isValid(signalSpec)
+            assert SignalClusterSpecParser.isValid(signalClusterSpecStr)
             assert usrParams.isValid()
-            r = (signalSpec, usrParams)
+            r = (signalClusterSpecStr, usrParams)
         return r
 
 assert escapeStringForUser(None) == '""'

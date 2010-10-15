@@ -40,9 +40,9 @@ XML representation of a Timink object (example excerpt):
 
   ...
 
-  <g                                                                        <-- top-level group
+  <g                                                                        <-- signal cluster group
     ns0:version="..."
-    ns0:signalspec="Xxxx"
+    ns0:signalclusterspec="Xxxx"
     ns0:usrparams="edgeTimeWidth:2.0px;..."
     id="...">
 
@@ -79,12 +79,12 @@ import inkex
 
 from ti_math import isfinite
 from ti_info import EXTENSION_NAME, VERSIONJOINT
-from ti_signalspec import SignalSpec, SignalSpecParser
+from ti_signalspec import SignalSpec, SignalClusterSpecParser
 from ti_pointtransform import PointTransf
-from ti_elem import Elem, PathElem, TiminkSignalGElem, TiminkTopLevelGElem
+from ti_elem import Elem, PathElem, SignalGElem, SignalClusterGElem
 from ti_usrparams import UsrParams
 from ti_gui import escapeStringForUser, printInfo, UserError
-from ti_gui import showErrorDlg, GUISignalSpecEditor
+from ti_gui import showErrorDlg, SignalClusterEditor
 
 
 class Timink(inkex.Effect):
@@ -156,7 +156,8 @@ class Timink(inkex.Effect):
         for signalIndex in sorted(sgDict.keys()):
             assert signalIndex >= 0
             if signalIndex >= newSignalCount:
-                # signal groups _without_ a corresponding element in signalSpecStrs -> remove
+                # signal group _without_ a corresponding element in signal cluster specification
+                # -> remove
                 sgDict[signalIndex].remove()
                 del sgDict[signalIndex]
                 if signalIndex in sgInfoDict:
@@ -165,7 +166,7 @@ class Timink(inkex.Effect):
                     del signalOriginDict[signalIndex]
                 if signalIndex in wasteElemDict:
                     del wasteElemDict[signalIndex]
-                printInfo('Signal {si}: Removed all SVG elements (no longer in signal specification).'.format(si=signalIndex))
+                printInfo('Signal {si}: Removed all SVG elements (no longer in signal cluster specification).'.format(si=signalIndex))
 
         for signalIndex in sorted(wasteElemDict.keys()):
             for we in wasteElemDict[signalIndex]:
@@ -290,64 +291,64 @@ class Timink(inkex.Effect):
     def effect(self):
         """Perform the effect: create/modify Timink 'g' elements"""
 
-        selectedGroup, sg, so = TiminkTopLevelGElem.getSelected(self.selected)
+        selectedSignalClusterGroup, sg, so = SignalClusterGElem.getSelected(self.selected)
         try:
             if len(so) > 0:
                 if len(so) == 1:
-                    msg = 'Element selected which is not part of a TimeDiag group.'
+                    msg = 'Element selected which is not part of a signal cluster.'
                 else:
-                    msg = 'Elements selected which are not part of a TimeDiag group.'
-                raise UserError(msg, 'Do select at most one TimeDiag group (and nothing else).')
-            if len(sg) > 0 and selectedGroup is None:
-                raise UserError('More than one TimeDiag group selected.',
-                                'Do select at most one TimeDiag group (and nothing else).')
+                    msg = 'Elements selected which are not part of a signal cluster.'
+                raise UserError(msg, 'Do select at most one signal cluster (and nothing else).')
+            if len(sg) > 0 and selectedSignalClusterGroup is None:
+                raise UserError('More than one signal cluster selected.',
+                                'Do select at most one signal cluster (and nothing else).')
             del so, sg
 
-            signalSpecStr = ''
+            signalClusterSpecStr = ''
             versionJoint = None
             usrParams = UsrParams()
-            if selectedGroup is not None:
-                selectedGroup = TiminkTopLevelGElem(selectedGroup)
-                signalSpecStr = selectedGroup.getSignalSpec()
-                if signalSpecStr is None:
-                    signalSpecStr = ''
-                versionJoint = selectedGroup.getVersionJoint()
-                r = UsrParams.parseStr(selectedGroup.getUsrParams())
+            if selectedSignalClusterGroup is not None:
+                selectedSignalClusterGroup = SignalClusterGElem(selectedSignalClusterGroup)
+                signalClusterSpecStr = selectedSignalClusterGroup.getSignalClusterSpec()
+                if signalClusterSpecStr is None:
+                    signalClusterSpecStr = ''
+                versionJoint = selectedSignalClusterGroup.getVersionJoint()
+                r = UsrParams.parseStr(selectedSignalClusterGroup.getUsrParams())
                 if r is not None:
                     usrParams, invalidKeys, unsupportedParamKeys = r
                     if len(invalidKeys) > 0:
                         s = ', '.join(map(escapeStringForUser, list(invalidKeys)))
-                        printInfo('Signal group (selected): Ignored unsupported attributes:\n' + s)
+                        printInfo('Signal cluster (selected): Ignored unsupported attributes:\n' + s)
                     if len(unsupportedParamKeys) > 0:
                         s = ', '.join(map(escapeStringForUser, list(unsupportedParamKeys)))
-                        printInfo('Signal group (selected): Ignored attributes with invalid values:\n' + s)
+                        printInfo('Signal cluster (selected): Ignored attributes with invalid values:\n' + s)
 
-            if selectedGroup is None:
+            if selectedSignalClusterGroup is None:
                 sgDict = None
                 sgInfoDict, signalOriginDict, wasteElemDict = (dict(), dict(), dict())
             else:
-                sgDict = selectedGroup.getSignalGroups()
+                sgDict = selectedSignalClusterGroup.getSignalGroups()
                 sgInfoDict, signalOriginDict, wasteElemDict = self.analyzeExistingSignalGroups(sgDict)
 
-            r = GUISignalSpecEditor(signalSpecStr, usrParams, versionJoint,
-                                    len(signalSpecStr) == 0,
+            r = SignalClusterEditor(signalClusterSpecStr, usrParams, versionJoint,
+                                    len(signalClusterSpecStr) == 0,
                                     len(signalOriginDict) > 1).run()
 
             if r is not None:
 
-                signalSpecStr, usrParams = r
-                signalSpecStrs = SignalSpecParser.split(signalSpecStr)
+                signalClusterSpecStr, usrParams = r
+                signalSpecStrs = SignalClusterSpecParser.split(signalClusterSpecStr)
                 assert len(signalSpecStrs) > 0
 
-                if selectedGroup is None:
-                    # create new top level group
-                    tg = TiminkTopLevelGElem.addEmpty(self.current_layer, signalSpecStr, usrParams)
+                if selectedSignalClusterGroup is None:
+                    # create new signal cluster group
+                    scg = SignalClusterGElem.addEmpty(self.current_layer, signalClusterSpecStr, usrParams)
                 else:
-                    tg = selectedGroup
-                    removedAttribs = sorted(list(tg.setAttribs(signalSpecStr, usrParams)))
+                    scg = selectedSignalClusterGroup
+                    removedAttribs = sorted(list(scg.setAttribs(signalClusterSpecStr, usrParams)))
                     if len(removedAttribs) > 0:
                         s = ', '.join(map(lambda o: escapeStringForUser(o), removedAttribs))
-                        printInfo('Signal group (selected): Removed unsupported attributes: ' + s)
+                        printInfo('Signal cluster (selected): Removed unsupported attributes: ' + s)
                         del s
                     sgInfoDict, signalOriginDict, wasteElemDict = \
                         self.cleanupExistingSignalGroups(len(signalSpecStrs), sgDict, sgInfoDict,
@@ -405,7 +406,7 @@ class Timink(inkex.Effect):
                     assert len(signalPaths) >= pathNo
 
                     if signalGroup is None:
-                        signalGroup = TiminkSignalGElem.addEmpty(tg, signalIndex)
+                        signalGroup = SignalGElem.addEmpty(scg, signalIndex)
                         signalGroup.setTransform(PointTransf.createTransl(signalOrigin))
                     else:
                         transf = signalGroup.getTransform()
@@ -464,7 +465,7 @@ class Timink(inkex.Effect):
                                 printInfo('Signal {si}: Did reset interfering fill style from \'path\' element to \'none\'.'.format(si=signalIndex))
                             if newSignalPath.forceVisibleStroke():
                                 printInfo('Signal {si}: Did reset invisible stroke style from \'path\' element to \'black\'.'.format(si=signalIndex))
-                            if tg.removeStyle():
+                            if scg.removeStyle():
                                 # possible, because assigning a style to a group in Inkscape
                                 # sets the style of all contained elements (all levels below)
                                 printInfo('Signal {si}: Did remove interfering style from \'g\' element.'.format(si=signalIndex))

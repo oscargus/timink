@@ -19,12 +19,17 @@ import math
 import re
 from ti_math import sign, quotientOrInf, isfinite, gcd, lcm
 
-class SignalSpecParser(object):
+class SignalClusterSpecParser(object):
+    """
+    Signal cluster specification.
+
+    See http://sourceforge.net/apps/trac/timink/wiki/UserManual for the complete grammar.
+    """
 
     @staticmethod
-    def cleanUp(signalSpec):
-        assert signalSpec is not None
-        s = re.sub('(\r\n)|\r|\n', '\n', signalSpec)
+    def cleanUp(signalClusterSpec):
+        assert signalClusterSpec is not None
+        s = re.sub('(\r\n)|\r|\n', '\n', signalClusterSpec)
         s = re.sub('\t', ' ', s)
         s = re.sub(' *\n', '\n', s) # remove trailing white space
         s = re.sub('\n\n+', '\n\n', s)
@@ -33,32 +38,32 @@ class SignalSpecParser(object):
         return s
 
     @staticmethod
-    def normalize(signalSpec):
-        assert signalSpec is not None
-        s = SignalSpecParser.cleanUp(signalSpec)
+    def normalize(signalClusterSpec):
+        assert signalClusterSpec is not None
+        s = SignalClusterSpecParser.cleanUp(signalClusterSpec)
         s = re.sub(' *', '', s)  # remove white space
         s = re.sub('\n+', '\n', s) # remove empty lines
         return s
 
     @staticmethod
-    def getInvalidCharPos(signalSpec):
-        assert signalSpec is not None
+    def getInvalidCharPos(signalClusterSpec):
+        assert signalClusterSpec is not None
         invCharPosList = []
-        for i in range(0, len(signalSpec)):
-            if signalSpec[i] not in '01-XxYy[]() \t\n\r':
+        for i in range(0, len(signalClusterSpec)):
+            if signalClusterSpec[i] not in '01-XxYy[]() \t\n\r':
                 invCharPosList.append(i)
         return invCharPosList
 
     @staticmethod
-    def getFirstNonmatchingParenthesis(signalSpec):
+    def getFirstNonmatchingParenthesis(signalClusterSpec):
         openElems = []
-        openElemIndices = [] # openElemIndices[i] = signalSpec[openElems[i]]
+        openElemIndices = [] # openElemIndices[i] = signalClusterSpec[openElems[i]]
         nonmatchingIndex = None
         OPENINGELEMDICT = { '[': ']', '(': ')' }
         CLOSINGELEMS = OPENINGELEMDICT.values()
         i = 0
-        while nonmatchingIndex is None and i < len(signalSpec):
-            c = signalSpec[i]
+        while nonmatchingIndex is None and i < len(signalClusterSpec):
+            c = signalClusterSpec[i]
             if c in '\r\n':
                 if nonmatchingIndex is None and len(openElemIndices) > 0:
                     nonmatchingIndex = openElemIndices[0]
@@ -68,7 +73,7 @@ class SignalSpecParser(object):
                 openElems.append(c)
                 openElemIndices.append(i)
             elif c in CLOSINGELEMS:
-                if len(openElemIndices) > 0 and OPENINGELEMDICT[signalSpec[openElemIndices[-1]]] == c:
+                if len(openElemIndices) > 0 and OPENINGELEMDICT[signalClusterSpec[openElemIndices[-1]]] == c:
                     del openElems[-1]
                     del openElemIndices[-1]
                 else:
@@ -79,89 +84,89 @@ class SignalSpecParser(object):
         return nonmatchingIndex
 
     @staticmethod
-    def getFirstInvalidMultiPathState(signalSpec):
+    def getFirstInvalidMultiPathState(signalClusterSpec):
         invalidCharRange = None
-        start = signalSpec.find('(')
+        start = signalClusterSpec.find('(')
         while invalidCharRange is None and start >= 0:
-            end = signalSpec.find(')', start + 1)
+            end = signalClusterSpec.find(')', start + 1)
             if end > start:
-                multiStateStr = signalSpec[start + 1: end].replace('\t', '').replace(' ', '')
+                multiStateStr = signalClusterSpec[start + 1: end].replace('\t', '').replace(' ', '')
                 if len(multiStateStr) == 0 or len(multiStateStr.strip('01-')) > 0:
                     invalidCharRange = (start, end + 1)
-                start = signalSpec.find('(', end + 1)
+                start = signalClusterSpec.find('(', end + 1)
             else:
-                invalidCharRange = (start, len(signalSpec))
+                invalidCharRange = (start, len(signalClusterSpec))
         return invalidCharRange
 
     @staticmethod
-    def isValid(signalSpec):
-        assert signalSpec is not None
-        s = SignalSpecParser.normalize(signalSpec)
+    def isValid(signalClusterSpec):
+        assert signalClusterSpec is not None
+        s = SignalClusterSpecParser.normalize(signalClusterSpec)
         return len(s) > 0 \
-            and len(SignalSpecParser.getInvalidCharPos(s)) == 0 \
-            and SignalSpecParser.getFirstNonmatchingParenthesis(s) is None \
-            and SignalSpecParser.getFirstInvalidMultiPathState(s) is None
+            and len(SignalClusterSpecParser.getInvalidCharPos(s)) == 0 \
+            and SignalClusterSpecParser.getFirstNonmatchingParenthesis(s) is None \
+            and SignalClusterSpecParser.getFirstInvalidMultiPathState(s) is None
 
     @staticmethod
-    def split(signalSpec):
-        assert signalSpec is not None
-        assert SignalSpecParser.isValid(signalSpec)
-        return SignalSpecParser.normalize(signalSpec).split('\n')
+    def split(signalClusterSpec):
+        assert signalClusterSpec is not None
+        assert SignalClusterSpecParser.isValid(signalClusterSpec)
+        return SignalClusterSpecParser.normalize(signalClusterSpec).split('\n')
 
     @staticmethod
     def testIt():
-        assert SignalSpecParser.cleanUp('') == ''
-        assert SignalSpecParser.cleanUp(' 0\t 1x AB  ') == ' 0  1x AB  '
-        assert SignalSpecParser.cleanUp(' \t01xAB\nC\t \n  ') == '  01xAB\nC'
-        assert SignalSpecParser.cleanUp('  \t\n\n 01xAB\nC\t \n  \t') == ' 01xAB\nC'
-        assert SignalSpecParser.cleanUp('A\n\rB\r\nC\n\n\nC\r\r\rD') == 'A\n\nB\nC\n\nC\n\nD'
+        assert SignalClusterSpecParser.cleanUp('') == ''
+        assert SignalClusterSpecParser.cleanUp(' 0\t 1x AB  ') == ' 0  1x AB  '
+        assert SignalClusterSpecParser.cleanUp(' \t01xAB\nC\t \n  ') == '  01xAB\nC'
+        assert SignalClusterSpecParser.cleanUp('  \t\n\n 01xAB\nC\t \n  \t') == ' 01xAB\nC'
+        assert SignalClusterSpecParser.cleanUp('A\n\rB\r\nC\n\n\nC\r\r\rD') == 'A\n\nB\nC\n\nC\n\nD'
 
-        assert SignalSpecParser.normalize('') == ''
-        assert SignalSpecParser.normalize(' \t ') == ''
-        assert SignalSpecParser.normalize(' 0\t 1x AB  ') == '01xAB'
-        assert SignalSpecParser.normalize(' \t01xAB\nC\t \n  ') == '01xAB\nC'
-        assert SignalSpecParser.normalize('  \t\n\n 01xAB\nC\t \n  \t') == '01xAB\nC'
-        assert SignalSpecParser.normalize('A\n\rB\r\nC\n\n\nC\r\r\rD') == 'A\nB\nC\nC\nD'
+        assert SignalClusterSpecParser.normalize('') == ''
+        assert SignalClusterSpecParser.normalize(' \t ') == ''
+        assert SignalClusterSpecParser.normalize(' 0\t 1x AB  ') == '01xAB'
+        assert SignalClusterSpecParser.normalize(' \t01xAB\nC\t \n  ') == '01xAB\nC'
+        assert SignalClusterSpecParser.normalize('  \t\n\n 01xAB\nC\t \n  \t') == '01xAB\nC'
+        assert SignalClusterSpecParser.normalize('A\n\rB\r\nC\n\n\nC\r\r\rD') == 'A\nB\nC\nC\nD'
 
-        assert SignalSpecParser.getInvalidCharPos('') == []
-        assert SignalSpecParser.getInvalidCharPos('01-xX') == []
-        assert SignalSpecParser.getInvalidCharPos('0XB1xC') == [2, 5]
+        assert SignalClusterSpecParser.getInvalidCharPos('') == []
+        assert SignalClusterSpecParser.getInvalidCharPos('01-xX') == []
+        assert SignalClusterSpecParser.getInvalidCharPos('0XB1xC') == [2, 5]
 
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('') == None
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0123xx?634') == None
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0[123x][x?634]') == None
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0[1]2[3') == 5
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0[1]23]') == 6
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0[1[2[3]') == 3
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0[1]\n2[3]') == None
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0[1\n]2[3]') == 1
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0[1()]2[3]') == None
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0[1()]2[3])') == 10
-        assert SignalSpecParser.getFirstNonmatchingParenthesis('0[1(]2[3])') == 4
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('') == None
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0123xx?634') == None
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[123x][x?634]') == None
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1]2[3') == 5
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1]23]') == 6
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1[2[3]') == 3
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1]\n2[3]') == None
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1\n]2[3]') == 1
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1()]2[3]') == None
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1()]2[3])') == 10
+        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1(]2[3])') == 4
 
-        assert not SignalSpecParser.isValid('')
-        assert not SignalSpecParser.isValid('  ')
-        assert not SignalSpecParser.isValid(' \t ')
-        assert SignalSpecParser.isValid(' x 10 X- ')
-        assert not SignalSpecParser.isValid(' \n  ')
-        assert SignalSpecParser.isValid(' \n 1 ')
+        assert not SignalClusterSpecParser.isValid('')
+        assert not SignalClusterSpecParser.isValid('  ')
+        assert not SignalClusterSpecParser.isValid(' \t ')
+        assert SignalClusterSpecParser.isValid(' x 10 X- ')
+        assert not SignalClusterSpecParser.isValid(' \n  ')
+        assert SignalClusterSpecParser.isValid(' \n 1 ')
 
-        assert SignalSpecParser.getFirstInvalidMultiPathState('') is None
-        assert SignalSpecParser.getFirstInvalidMultiPathState('01X') is None
-        assert SignalSpecParser.getFirstInvalidMultiPathState('01X()Y') == (3, 5)
-        assert SignalSpecParser.getFirstInvalidMultiPathState('01X(01-00-)Y') == None
-        assert SignalSpecParser.getFirstInvalidMultiPathState('01X( 0\t1 -0 0- )Y') == None
-        assert SignalSpecParser.getFirstInvalidMultiPathState('01X(01-0)Y(-)') == None
-        assert SignalSpecParser.getFirstInvalidMultiPathState('01X(01-0)Y(X-)') == (10, 14)
-        assert SignalSpecParser.getFirstInvalidMultiPathState('01X()') == (3, 5)
-        assert SignalSpecParser.getFirstInvalidMultiPathState('01X(\n') == (3, 5)
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('') is None
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X') is None
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X()Y') == (3, 5)
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-00-)Y') == None
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X( 0\t1 -0 0- )Y') == None
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-0)Y(-)') == None
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-0)Y(X-)') == (10, 14)
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X()') == (3, 5)
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(\n') == (3, 5)
 
-        assert SignalSpecParser.isValid('-[X(01-)]0')
-        assert not SignalSpecParser.isValid('-[X()]0')
+        assert SignalClusterSpecParser.isValid('-[X(01-)]0')
+        assert not SignalClusterSpecParser.isValid('-[X()]0')
 
 class SignalSpec(object):
     """
-    Signal specification (of one signal).
+    Signal specification.
     """
 
     def __init__(self, states=[]):
@@ -628,9 +633,9 @@ class SignalSpec(object):
     @staticmethod
     def createFromStr(signalSpecStr, unitTime):
         """
-        Creates a SignalSpec object from a normalised signal description (for one signal).
+        Creates a SignalSpec object from a normalised signal specification (for one signal).
 
-        signalSpecStr: normalized signal description for one signal
+        signalSpecStr: normalized signal specification for one signal
                        (exactly one non-empty valid line, without whitespaces).
         Returns: SignalSpec object corresponding to signalSpecStr, or None if signalSpecStr is not valid
         """
@@ -915,6 +920,6 @@ class SignalSpec(object):
         assert l == []
 
 
-SignalSpecParser.testIt()
+SignalClusterSpecParser.testIt()
 SignalSpec.testIt()
 
