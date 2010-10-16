@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:ns0="http://timink.sourceforge.net/"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   sodipodi:docname="signalclusterterms1.svg"
+   inkscape:version="0.47 r22583"
+   version="1.1"
+   id="svg2816"
+   height="88"
+   width="170">
+  <title
+     id="title4976">Signal cluster: terminology</title>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="4.5764706"
+     inkscape:cx="84.613561"
+     inkscape:cy="29.204142"
+     inkscape:document-units="px"
+     inkscape:current-layer="g2847"
+     showgrid="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:snap-bbox="false"
+     inkscape:snap-grids="true"
+     inkscape:snap-to-guides="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-global="true"
+     inkscape:snap-nodes="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid1px"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata2818">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Signal cluster: terminology</dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Daniel Lutz</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs2822">
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#pattern2945"
+       id="pattern3717"
+       patternTransform="translate(299,441)" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#pattern2945"
+       id="pattern3715"
+       patternTransform="translate(299,441)" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#pattern2945"
+       id="pattern3713"
+       patternTransform="translate(299,441)" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#pattern4896"
+       id="pattern2945"
+       patternTransform="translate(235,442)" />
+    <inkscape:perspective
+       id="perspective58"
+       inkscape:persp3d-origin="85 : 31 : 1"
+       inkscape:vp_z="170 : 46.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 46.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#StripesGray45Degree"
+       id="pattern4896"
+       patternTransform="translate(302,441)" />
+    <pattern
+       id="StripesGray45Degree"
+       width="4"
+       height="4"
+       patternUnits="userSpaceOnUse">
+      <path
+         d="M 0,2 2,0 M 2,4 4,2 M 0,4 4,0"
+         style="fill:none;stroke:#808080;stroke-width:0.30000001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         id="path2844" />
+    </pattern>
+    <marker
+       inkscape:stockid="DotMY"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="DotMY"
+       style="overflow:visible">
+      <path
+         id="path5986"
+         d="m -2.5,-1 c 0,2.76 -2.24,5 -5,5 -2.76,0 -5,-2.24 -5,-5 0,-2.76 2.24,-5 5,-5 2.76,0 5,2.24 5,5 z"
+         style="fill:#ff0000;fill-rule:evenodd;stroke:#ff0000;stroke-width:1pt;marker-start:none;marker-end:none"
+         transform="matrix(0.4,0,0,0.4,2.96,0.4)" />
+    </marker>
+    <marker
+       inkscape:stockid="DotMV"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="DotMV"
+       style="overflow:visible">
+      <path
+         id="path5989"
+         d="m -2.5,-1 c 0,2.76 -2.24,5 -5,5 -2.76,0 -5,-2.24 -5,-5 0,-2.76 2.24,-5 5,-5 2.76,0 5,2.24 5,5 z"
+         style="fill:#ff0000;fill-rule:evenodd;stroke:#ff0000;stroke-width:1pt;marker-start:none;marker-end:none"
+         transform="matrix(0.4,0,0,0.4,2.96,0.4)" />
+    </marker>
+    <marker
+       inkscape:stockid="DotM6"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="DotM6"
+       style="overflow:visible">
+      <path
+         id="path5992"
+         d="m -2.5,-1 c 0,2.76 -2.24,5 -5,5 -2.76,0 -5,-2.24 -5,-5 0,-2.76 2.24,-5 5,-5 2.76,0 5,2.24 5,5 z"
+         style="fill:#ff0000;fill-rule:evenodd;stroke:#ff0000;stroke-width:1pt;marker-start:none;marker-end:none"
+         transform="matrix(0.4,0,0,0.4,2.96,0.4)" />
+    </marker>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       id="perspective8912" />
+    <marker
+       orient="auto"
+       id="ArrowRound1MStart">
+      <path
+         id="path7943"
+         style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         d="M 0,0 6,-2 6,2 z" />
+    </marker>
+    <marker
+       id="ArrowRound1MEnd"
+       orient="auto">
+      <path
+         id="path7946"
+         style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         d="m 0,0 -6,-2 0,4 z" />
+    </marker>
+    <marker
+       inkscape:stockid="ArrowRound1MStartU"
+       orient="auto"
+       id="ArrowRound1MStartU">
+      <path
+         id="path5112"
+         style="fill:#00ff00;fill-opacity:1;stroke:#00ff00;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         d="M 0,0 6,-2 6,2 z" />
+    </marker>
+    <marker
+       inkscape:stockid="ArrowRound1MStartx"
+       orient="auto"
+       id="ArrowRound1MStartx">
+      <path
+         id="path5115"
+         style="fill:#999999;fill-opacity:1;stroke:#999999;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         d="M 0,0 6,-2 6,2 z" />
+    </marker>
+    <marker
+       inkscape:stockid="ArrowRound1MStarti"
+       orient="auto"
+       id="ArrowRound1MStarti">
+      <path
+         id="path5118"
+         style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         d="M 0,0 6,-2 6,2 z" />
+    </marker>
+    <marker
+       inkscape:stockid="ArrowRound1MStartq"
+       orient="auto"
+       id="ArrowRound1MStartq">
+      <path
+         id="path5121"
+         style="fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         d="M 0,0 6,-2 6,2 z" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="signal"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-912)">
+    <g
+       ns0:usrparams="edgeTimeWidth:2.0px;originDistX:0.0px;originDistY:20.0px;placementMethod:homogeneous;signalHeight:10.0px;unitTimeWidth:10.0px"
+       ns0:signalclusterspec="0[X]1XYx0(0010)0(0001)0\n01010101010\n--XXXX[xxx]--"
+       ns0:version="0.1.0/1.0"
+       id="g2893"
+       transform="translate(-299,471)">
+      <g
+         inkscape:label="signalgroup0"
+         transform="translate(350,480)"
+         id="g2895">
+        <path
+           id="path3612"
+           style="fill:url(#pattern3713);fill-opacity:1;stroke:none"
+           inkscape:label="shadingpath"
+           d="m 0,0 m 10,0 10,0 2,-10 -10,0 z" />
+        <path
+           style="fill:none;stroke:#0000ff;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="path2899"
+           inkscape:label="signalpath3"
+           d="m 0,0 20,0 2,-10 8,0 2,10 8,0 2,-10 18,0 2,10 28,0 2,-10 8,0 2,10 8,0" />
+        <path
+           style="fill:none;stroke:#00ff00;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="path2901"
+           inkscape:label="signalpath2"
+           d="m 0,0 10,0 2,-10 28,0 2,10 28,0 2,-10 8,0 2,10 28,0" />
+        <path
+           style="fill:none;stroke:#999999"
+           id="path2903"
+           inkscape:label="signalpath1"
+           d="m 0,0 20,0 2,-10 8,0 2,10 18,0 2,-10 8,0 2,10 48,0" />
+        <path
+           style="fill:none;stroke:#000000"
+           id="path2905"
+           inkscape:label="signalpath0"
+           d="m 0,0 10,0 2,-10 38,0 2,10 58,0" />
+      </g>
+      <g
+         inkscape:label="signalgroup1"
+         transform="translate(350,500)"
+         id="g2995">
+        <path
+           id="path3619"
+           style="fill:url(#pattern3715);fill-opacity:1;stroke:none"
+           inkscape:label="shadingpath"
+           d="" />
+        <path
+           d=""
+           inkscape:label="signalpath3"
+           style="fill:none;stroke:#0000ff;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="path3005" />
+        <path
+           d=""
+           inkscape:label="signalpath2"
+           style="fill:none;stroke:#00ff00;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="path3003" />
+        <path
+           d=""
+           inkscape:label="signalpath1"
+           style="fill:none;stroke:#999999"
+           id="path3001" />
+        <path
+           style="fill:none;stroke:#000000"
+           id="path2999"
+           inkscape:label="signalpath0"
+           d="m 0,0 10,0 2,-10 8,0 2,10 8,0 2,-10 8,0 2,10 8,0 2,-10 8,0 2,10 8,0 2,-10 8,0 2,10 8,0 2,-10 8,0 2,10 8,0" />
+      </g>
+      <g
+         inkscape:label="signalgroup2"
+         transform="translate(350,520)"
+         id="g3487">
+        <path
+           id="path3626"
+           style="fill:url(#pattern3717);fill-opacity:1;stroke:none"
+           inkscape:label="shadingpath"
+           d="m 0,0 m 61,-5 1,5 28,0 1,-5 -1,-5 -28,0 z" />
+        <path
+           d=""
+           inkscape:label="signalpath3"
+           style="fill:none;stroke:#0000ff;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="path3497" />
+        <path
+           d=""
+           inkscape:label="signalpath2"
+           style="fill:none;stroke:#00ff00;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="path3495" />
+        <path
+           style="fill:none;stroke:#999999"
+           id="path3491"
+           inkscape:label="signalpath1"
+           d="m 0,0 m 0,-5 20,0 1,5 39,0 2,-10 28,0 1,5 19,0" />
+        <path
+           style="fill:none;stroke:#000000"
+           id="path3493"
+           inkscape:label="signalpath0"
+           d="m 0,0 m 0,-5 20,0 1,-5 39,0 2,10 28,0 1,-5 19,0" />
+      </g>
+    </g>
+  </g>
+  <g
+     inkscape:label="annotation"
+     inkscape:groupmode="layer"
+     id="g2847"
+     transform="translate(0,-912)">
+    <text
+       xml:space="preserve"
+       style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
+       x="44.472656"
+       y="921"
+       id="text2951"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2953"
+         x="44.472656"
+         y="921"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ff0000;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans">signal cluster</tspan></text>
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.49999997;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMY)"
+       d="m 147,941 0,-17"
+       id="path4877"
+       sodipodi:nodetypes="cc" />
+    <path
+       sodipodi:nodetypes="cc"
+       style="fill:#ff0000;fill-opacity:1;stroke:#ff0000;stroke-width:0.49999997;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-end:url(#DotM6)"
+       d="m 127,929 0,12"
+       id="path4879" />
+    <path
+       sodipodi:nodetypes="cc"
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMV)"
+       d="M 107,940.68823 107,929"
+       id="path4885" />
+    <path
+       id="path4476"
+       d="m 117,951 0,-22"
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMV)"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
+       x="2"
+       y="948"
+       id="text2956"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="2"
+         y="948"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ff0000;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+         id="tspan2960">signals</tspan></text>
+    <rect
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1.5, 1.5;stroke-dashoffset:0"
+       id="rect3722"
+       width="116"
+       height="16"
+       x="48"
+       y="938" />
+    <rect
+       y="958"
+       x="48"
+       height="16"
+       width="116"
+       id="rect3724"
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1.5, 1.5;stroke-dashoffset:0" />
+    <rect
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1.5, 1.5;stroke-dashoffset:0"
+       id="rect3726"
+       width="116"
+       height="16"
+       x="48"
+       y="978" />
+    <rect
+       y="934.99994"
+       x="45"
+       height="61.999996"
+       width="122"
+       id="rect3728"
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1.5, 1.5;stroke-dashoffset:0" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text3730"
+       y="921"
+       x="106.47266"
+       style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ff0000;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+         y="921"
+         x="106.47266"
+         id="tspan3732"
+         sodipodi:role="line">signal paths</tspan></text>
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       d="m 147,929 -40,0"
+       id="path3734" />
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMY)"
+       d="m 76,935 0,-11"
+       id="path3736"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMY)"
+       d="m 48,986 -9,0"
+       id="path4766" />
+    <path
+       id="path4968"
+       d="m 48,986 -9,0"
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMY)" />
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMY)"
+       d="m 48,966 -9,0"
+       id="path4970" />
+    <path
+       id="path4972"
+       d="m 48,946 -15,0"
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMY)"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       d="M 39.08162,945.98393 39,986"
+       id="path4974" />
+  </g>
+</svg>
