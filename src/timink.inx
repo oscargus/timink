@@ -1,12 +1,12 @@
 <inkscape-extension>
   <_name>Timink</_name>
   <id>net.sourceforge.timink</id>
-  <dependency type="executable" location="extensions">timink.py</dependency>
+  <dependency type="executable" location="extensions">timink/timink.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
   <effect>
     <object-type>all</object-type>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">timink.py</command>
+    <command reldir="extensions" interpreter="python">timink/timink.py</command>
   </script>
 </inkscape-extension>

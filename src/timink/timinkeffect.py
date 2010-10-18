@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Timink - an Inkscape extension for digital timing diagrams.
 # Copyright (C) 2010 Daniel Lutz
 #

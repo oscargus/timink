@@ -1,9 +1,6 @@
-# Inkscape 0.47 does not support path separators in .inx files, so this file has to reside
-# directly in one of the extension directories.
-
 import sys
 if sys.version_info >= (2, 6) and sys.version_info < (3, 0):
-    from timink.timinkeffect import TiminkEffect
+    from timinkeffect import TiminkEffect
     TiminkEffect.testIt()
     TiminkEffect().affect()
 else:
