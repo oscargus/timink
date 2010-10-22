@@ -633,10 +633,9 @@ class SignalSpec(object):
     @staticmethod
     def createFromStr(signalSpecStr, unitTime):
         """
-        Creates a SignalSpec object from a normalised signal specification (for one signal).
+        Creates a SignalSpec object from a signal specification (for one signal).
 
-        signalSpecStr: normalized signal specification for one signal
-                       (exactly one non-empty valid line, without whitespaces).
+        signalSpecStr: signal specification for one signal (exactly one non-empty line).
         Returns: SignalSpec object corresponding to signalSpecStr, or None if signalSpecStr is not valid
         """
 
@@ -677,12 +676,15 @@ class SignalSpec(object):
                     states.append((t, multiStateStr, doShade))
                     t = t + unitTime
                     multiStateStr = None
+                elif c in ' \t':
+                    pass
+                elif multiStateStr is None:
+                    states.append((t, STATESTRDICT[c], doShade))
+                    t = t + unitTime
+                elif c in '01-':
+                    multiStateStr = multiStateStr + c
                 else:
-                    if multiStateStr is None:
-                        states.append((t, STATESTRDICT[c], doShade))
-                        t = t + unitTime
-                    else:
-                        multiStateStr = multiStateStr + c
+                    ok = False
 
                 i = i + 1
         except KeyError:
@@ -746,10 +748,11 @@ class SignalSpec(object):
         ]
         assert SignalSpec.createFromStr('-[X()]0', 10.0) is None
         assert SignalSpec.createFromStr('-[X]0(', 10.0) is None
-
+        assert SignalSpec.createFromStr('(10X)', 10.0) is None
+        assert SignalSpec.createFromStr('(X10)', 10.0) is None
+        assert SignalSpec.createFromStr(' ( 0 1- ) ', 10.0) is not None
         assert SignalSpec.createFromStr('', 10.0) is None
         assert SignalSpec.createFromStr('01\n0', 10.0) is None
-        assert SignalSpec.createFromStr('0 1', 10.0) is None
 
         s = SignalSpec.createFromStr('Xx', 1.0)
         assert s.states == [(0.0, '10', False), (1.0, '01', False), (2.0, '01', False)]
