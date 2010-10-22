@@ -26,7 +26,7 @@ try:
 except ImportError:
     raise RuntimeError("pygtk ist not available!")
 
-from ti_info import EXTENSION_NAME, VERSIONJOINT
+from ti_info import EXTENSION_TITLE, VERSIONJOINT
 from ti_version import VersionJoint
 from ti_math import isfinite
 from ti_signalspec import SignalClusterSpecParser
@@ -62,7 +62,7 @@ def showErrorDlg(msg, hint = None, title = None):
     try:
         dlg = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons=gtk.BUTTONS_OK, message_format=msg)
         if title is None:
-            title = EXTENSION_NAME
+            title = EXTENSION_TITLE
         dlg.set_title(title)
         dlg.format_secondary_text(hint)
         dlg.run()
@@ -417,7 +417,7 @@ class SignalClusterEditor(object):
         and usrParams is a valid UsrParams object.
         """
 
-        dlgTitle = unicode(EXTENSION_NAME) + ' ' + unicode(VERSIONJOINT.extension)
+        dlgTitle = u'{title} {version}'.format(title=EXTENSION_TITLE, version=VERSIONJOINT.extension)
         dlg = gtk.Dialog(dlgTitle, None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT) # ???
         dlg.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT)
         if self.isNew:

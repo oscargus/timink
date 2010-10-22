@@ -76,7 +76,6 @@ import re
 import inkex
 
 from ti_math import isfinite
-from ti_info import EXTENSION_NAME, VERSIONJOINT
 from ti_signalspec import SignalSpec, SignalClusterSpecParser
 from ti_pointtransform import PointTransf
 from ti_elem import Elem, PathElem, SignalGElem, SignalClusterGElem

@@ -16,8 +16,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 from ti_version import VersionJoint
+import re
 
-EXTENSION_NAME = 'Timink'
+EXTENSION_TITLE = 'Timink' # to be displayed to the user
+EXTENSION_NAME = 'timink'  # to be used as part of identifiers (only lower-case letters)
+
+assert re.match(r'^[a-z]+$', EXTENSION_NAME)
 
 # <joint-version-number> ::= <extension-version-number> "/" <model-version-number>.
 #
