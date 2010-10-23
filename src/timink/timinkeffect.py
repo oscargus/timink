@@ -334,7 +334,7 @@ class TiminkEffect(inkex.Effect):
             if r is not None:
 
                 signalClusterSpecStr, usrParams = r
-                signalSpecStrs = SignalClusterSpecParser.split(signalClusterSpecStr)
+                signalSpecStrs = SignalClusterSpecParser.normalize(signalClusterSpecStr).split('\n')
                 assert len(signalSpecStrs) > 0
 
                 if selectedSignalClusterGroup is None:

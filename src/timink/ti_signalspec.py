@@ -19,6 +19,133 @@ import math
 import re
 from ti_math import sign, quotientOrInf, isfinite, gcd, lcm
 
+class SignalSpecParser(object):
+    """
+    Signal specification.
+
+    See http://sourceforge.net/apps/trac/timink/wiki/UserManual for the complete grammar.
+    """
+
+    @staticmethod
+    def parse(signalSpecStr, unitTime, breakTime):
+        """
+        Creates the state liste for SignalSpec from a signal specification (for one signal).
+
+        signalSpecStr: signal specification for one signal (exactly one non-empty line).
+        unitTime: time for each state (> 0)
+        breakTime: time for each break (> 0)
+        Returns: list of state lists for SignalSpec(), or None if signalSpecStr is not valid
+        """
+
+        assert isfinite(unitTime) and unitTime > 0.0
+        assert isfinite(breakTime) and breakTime > 0.0
+
+        STATESTRDICT = {
+            '0': '0',
+            '1': '1',
+            '-': '-',
+            'X': '10',
+            'x': '01',
+            'Y': '1001',
+            'y': '0110',
+        }
+
+        statesList = []
+        incomplStates = []
+        t = 0
+        doShade = False
+        multiStateStr = None
+        ok = True
+
+        i = 0
+
+        try:
+            while ok and i < len(signalSpecStr):
+                c = signalSpecStr[i]
+                if c == '[':
+                    ok = not doShade
+                    doShade = True
+                elif c == ']':
+                    ok = doShade
+                    doShade = False
+                elif c == '(':
+                    ok = multiStateStr is None
+                    multiStateStr = ''
+                elif c == ')':
+                    ok = multiStateStr is not None and len(multiStateStr) > 0
+                    incomplStates.append((t, multiStateStr, doShade))
+                    t = t + unitTime
+                    multiStateStr = None
+                elif c in ' \t':
+                    pass
+                elif c == '_':
+                    if len(incomplStates) > 0:
+                        incomplStates.append((t,) + incomplStates[-1][1:])
+                        statesList.append(incomplStates)
+                        incomplStates = []
+                    ok = multiStateStr is None and len(statesList) > 0
+                    t = t + breakTime
+                elif multiStateStr is None:
+                    incomplStates.append((t, STATESTRDICT[c], doShade))
+                    t = t + unitTime
+                elif c in '01-':
+                    multiStateStr = multiStateStr + c
+                else:
+                    ok = False
+
+                i = i + 1
+        except KeyError:
+            ok = False
+
+        if len(incomplStates) > 0:
+            incomplStates.append((t,) + incomplStates[-1][1:])
+            statesList.append(incomplStates)
+        ok = ok and not doShade and multiStateStr is None and len(incomplStates) > 0 and len(statesList) > 0
+
+        if not ok:
+            statesList = None
+
+        return statesList
+
+    @staticmethod
+    def testIt():
+        assert SignalSpecParser.parse('0011', 10.0, 5.0) == [
+            [(0.0, '0', False), (10.0, '0', False), (20.0, '1', False), (30.0, '1', False), (40.0, '1', False)]
+        ]
+        assert SignalSpecParser.parse('01-Xx', 10.0, 5.0) == [
+            [
+                (0.0, '0', False), (10.0, '1', False), (20.0, '-', False), (30.0, '10', False),
+                (40.0, '01', False), (50.0, '01', False)
+            ]
+        ]
+        assert SignalSpecParser.parse('-[X(01-)]0', 10.0, 5.0) == [
+            [
+                (0.0, '-', False),
+                (10.0, '10', True),
+                (20.0, '01-', True),
+                (30.0, '0', False),
+                (40.0, '0', False)
+            ]
+        ]
+        assert SignalSpecParser.parse('-[X()]0', 10.0, 5.0) is None
+        assert SignalSpecParser.parse('-[X]0(', 10.0, 5.0) is None
+        assert SignalSpecParser.parse('(10X)', 10.0, 5.0) is None
+        assert SignalSpecParser.parse('(X10)', 10.0, 5.0) is None
+        assert SignalSpecParser.parse(' ( 0 1- ) ', 10.0, 5.0) is not None
+        assert SignalSpecParser.parse('', 10.0, 5.0) is None
+        assert SignalSpecParser.parse('01\n0', 10.0, 5.0) is None
+
+        assert SignalSpecParser.parse('01-_01', 10.0, 5.0) == [
+            [(0.0, '0', False), (10.0, '1', False), (20.0, '-', False), (30.0, '-', False)],
+            [(35.0, '0', False), (45.0, '1', False), (55.0, '1', False)]
+        ]
+        assert SignalSpecParser.parse('01- __ _ 01', 10.0, 5.0) == [
+            [(0.0, '0', False), (10.0, '1', False), (20.0, '-', False), (30.0, '-', False)],
+            [(45.0, '0', False), (55.0, '1', False), (65.0, '1', False)]
+        ]
+        assert SignalSpecParser.parse('_ _0', 10.0, 5.0) is None
+        assert SignalSpecParser.parse('0_', 10.0, 5.0) is None
+
 class SignalClusterSpecParser(object):
     """
     Signal cluster specification.
@@ -50,7 +177,7 @@ class SignalClusterSpecParser(object):
         assert signalClusterSpec is not None
         invCharPosList = []
         for i in range(0, len(signalClusterSpec)):
-            if signalClusterSpec[i] not in '01-XxYy[]() \t\n\r':
+            if signalClusterSpec[i] not in '01-XxYy[]()_ \t\n\r':
                 invCharPosList.append(i)
         return invCharPosList
 
@@ -99,19 +226,28 @@ class SignalClusterSpecParser(object):
         return invalidCharRange
 
     @staticmethod
-    def isValid(signalClusterSpec):
-        assert signalClusterSpec is not None
-        s = SignalClusterSpecParser.normalize(signalClusterSpec)
-        return len(s) > 0 \
-            and len(SignalClusterSpecParser.getInvalidCharPos(s)) == 0 \
-            and SignalClusterSpecParser.getFirstNonmatchingParenthesis(s) is None \
-            and SignalClusterSpecParser.getFirstInvalidMultiPathState(s) is None
+    def getFirstInvalidBreak(signalClusterSpec):
+        invalidCharRange = None
+        breakStartRegexp = re.compile(r'^[ \t]*(_([ \t]*_)*)', re.MULTILINE)
+        breakEndRegexp = re.compile(r'(_([ \t]*_)*)[ \t]*$', re.MULTILINE)
+        m = breakStartRegexp.search(signalClusterSpec)
+        if m:
+            invalidCharRange = (m.start(1), m.end(1))
+        m = breakEndRegexp.search(signalClusterSpec)
+        if m and (invalidCharRange is None or invalidCharRange[0] > m.start(1)):
+            invalidCharRange = (m.start(1), m.end(1))
+        return invalidCharRange
 
     @staticmethod
-    def split(signalClusterSpec):
+    def isValid(signalClusterSpec):
         assert signalClusterSpec is not None
-        assert SignalClusterSpecParser.isValid(signalClusterSpec)
-        return SignalClusterSpecParser.normalize(signalClusterSpec).split('\n')
+        signalSpecs = SignalClusterSpecParser.normalize(signalClusterSpec).split('\n')
+        ok = len(signalSpecs) > 0
+        i = 0
+        while ok and i < len(signalSpecs):
+            ok = SignalSpecParser.parse(signalSpecs[i], 1.0, 1.0) is not None
+            i = i + 1
+        return ok
 
     @staticmethod
     def testIt():
@@ -154,12 +290,19 @@ class SignalClusterSpecParser(object):
         assert SignalClusterSpecParser.getFirstInvalidMultiPathState('') is None
         assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X') is None
         assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X()Y') == (3, 5)
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-00-)Y') == None
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X( 0\t1 -0 0- )Y') == None
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-0)Y(-)') == None
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-00-)Y') is None
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X( 0\t1 -0 0- )Y') is None
+        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-0)Y(-)') is None
         assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-0)Y(X-)') == (10, 14)
         assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X()') == (3, 5)
         assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(\n') == (3, 5)
+
+        assert SignalClusterSpecParser.getFirstInvalidBreak('') is None
+        assert SignalClusterSpecParser.getFirstInvalidBreak('0_1\n10-\r\n0__0_ _1') is None
+        assert SignalClusterSpecParser.getFirstInvalidBreak(' __ _0') == (1, 5)
+        assert SignalClusterSpecParser.getFirstInvalidBreak('0 _  __ ') == (2, 7)
+        assert SignalClusterSpecParser.getFirstInvalidBreak('0_1\n10-\r\n _\t_ 0__0_ _1') == (10, 13)
+        assert SignalClusterSpecParser.getFirstInvalidBreak('0_1_\n10-\r\n _\t_ 0__0_ _1') == (3, 4)
 
         assert SignalClusterSpecParser.isValid('-[X(01-)]0')
         assert not SignalClusterSpecParser.isValid('-[X()]0')
@@ -403,14 +546,22 @@ class SignalSpec(object):
         verticesA, verticesB:
           paths of vertices (t, y) with non-decreasing t along the indices
         Returns:
-          Unique list of non-crossing paths (vertices) around all non-empty areas enclosed
-          by the two paths described by verticesA, verticesB.
+          (fillPaths, isFirstShadingOpen, isLastShadingOpen).
+          fillPaths is a unique list of non-crossing paths (vertices) around all non-empty areas
+          enclosed by the two paths described by verticesA, verticesB.
           Each pair of paths has at most one point in common.
           Path direction: counter-clockwise, starting at leftmost (and topmost, if ambiguous)
           common point.
+          isFirstShadingOpen is True, if the first shading area in fillPaths is not bounded
+          to the left by an intersection of the paths, but by the beginning of the paths.
+          isLastShadingOpen is True, if the last shading area in fillPaths is not bounded
+          to the right by an intersection of the paths, but by the end of the paths.
         """
 
         fillPaths = []
+        # shading "open" to the left or the right, respectively?
+        isFirstShadingOpen = False
+        isLastShadingOpen = False
 
         if len(verticesA) >= 2 and len(verticesB) >= 2:
 
@@ -423,6 +574,8 @@ class SignalSpec(object):
             shadingIndexRanges = [] # list of tuples ((iAStart, iBStart), (iAStop, iBStop))
             incomplStartIndices = None  # None or (iAStart, iBStart)
             if vA[iA] != vB[iB]:
+                # shading is not "closed" to the left
+                isFirstShadingOpen = True
                 incomplStartIndices = (iA, iB)
 
             while iA + 1 < len(vA) and iB + 1 < len(vB):
@@ -482,6 +635,8 @@ class SignalSpec(object):
                                 vB.insert(iB + 1, (t, SignalSpec._interpolateAt(vB, iB, t)))
 
             if incomplStartIndices is not None:
+                # shading is not "closed" to the right
+                isLastShadingOpen = vA[-1] != vB[-1]
                 shadingIndexRanges.append((incomplStartIndices, (len(vA), len(vB))))
                 incomplStartIndices = None
 
@@ -520,7 +675,10 @@ class SignalSpec(object):
 
                 fillPaths.append(fillPath)
 
-        return fillPaths
+        assert len(fillPaths) > 0 or not isFirstShadingOpen
+        assert len(fillPaths) > 0 or not isLastShadingOpen
+
+        return (fillPaths, isFirstShadingOpen, isLastShadingOpen)
 
     def getAllPathVerticesAndShading(self, edgeTimeWidth):
         """
@@ -545,15 +703,14 @@ class SignalSpec(object):
                                    self.states[min(endIndex + 1, len(self.states) - 1)][0])
                 path0Sub = SignalSpec._getVerticesSlice(pathVerticesList[0], startTimeBound, endTimeBound)
                 path1Sub = SignalSpec._getVerticesSlice(pathVerticesList[1], startTimeBound, endTimeBound)
-                shading01Vertices = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
-                if endTimeBound != endTime and len(shading01Vertices) > 0 \
-                    and shading01Vertices[-1][0][0] < endTime and path0Sub[-1][1] != path1Sub[-1][1]:
+                shading01Vertices, isFirstShadingOpen, isLastShadingOpen = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
+                if endTimeBound != endTime and len(shading01Vertices) > 0 and shading01Vertices[-1][0][0] < endTime and isLastShadingOpen:
                     # last shading area starts before endTime and ends with path0Sub, path1Sub
                     # -> no intersection after endTime
                     # -> shorten to endTime
                     path0Sub = SignalSpec._getVerticesSlice(pathVerticesList[0], startTimeBound, endTime)
                     path1Sub = SignalSpec._getVerticesSlice(pathVerticesList[1], startTimeBound, endTime)
-                    shading01Vertices = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
+                    shading01Vertices, isFirstShadingOpen, isLastShadingOpen = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
                 else:
                     while len(shading01Vertices) > 1 and shading01Vertices[-1][0][0] > endTime:
                         del shading01Vertices[-1]
@@ -631,71 +788,24 @@ class SignalSpec(object):
         return vertices
 
     @staticmethod
-    def createFromStr(signalSpecStr, unitTime):
+    def createFromStr(signalSpecStr, unitTime, breakTime=1.0):#???
         """
         Creates a SignalSpec object from a signal specification (for one signal).
 
         signalSpecStr: signal specification for one signal (exactly one non-empty line).
+        unitTime: time for each state (> 0)
+        breakTime: time for each break (> 0)
         Returns: SignalSpec object corresponding to signalSpecStr, or None if signalSpecStr is not valid
         """
 
         assert isfinite(unitTime) and unitTime > 0.0
+        assert isfinite(breakTime) and breakTime > 0.0
 
-        STATESTRDICT = {
-            '0': '0',
-            '1': '1',
-            '-': '-',
-            'X': '10',
-            'x': '01',
-            'Y': '1001',
-            'y': '0110',
-        }
-
-        states = []
-        t = 0
-        doShade = False
-        multiStateStr = None
-        ok = True
-
-        i = 0
-
-        try:
-            while ok and i < len(signalSpecStr):
-                c = signalSpecStr[i]
-                if c == '[':
-                    ok = not doShade
-                    doShade = True
-                elif c == ']':
-                    ok = doShade
-                    doShade = False
-                elif c == '(':
-                    ok = multiStateStr is None
-                    multiStateStr = ''
-                elif c == ')':
-                    ok = multiStateStr is not None and len(multiStateStr) > 0
-                    states.append((t, multiStateStr, doShade))
-                    t = t + unitTime
-                    multiStateStr = None
-                elif c in ' \t':
-                    pass
-                elif multiStateStr is None:
-                    states.append((t, STATESTRDICT[c], doShade))
-                    t = t + unitTime
-                elif c in '01-':
-                    multiStateStr = multiStateStr + c
-                else:
-                    ok = False
-
-                i = i + 1
-        except KeyError:
-            ok = False
-        ok = ok and not doShade and multiStateStr is None and len(states) > 0
-
-        if ok:
-            states.append((t, states[-1][1]))
-            s = SignalSpec(states)
-        else:
+        statesList = SignalSpecParser.parse(signalSpecStr, unitTime, breakTime)
+        if statesList is None:
             s = None
+        else:
+            s = SignalSpec(statesList[0])#???
         return s
 
     @staticmethod
@@ -795,49 +905,96 @@ class SignalSpec(object):
         assert SignalSpec._getVertexIntersPoint([(1.0, 0.0), (2.0, 0.0), (2.0, 0.6)], [(1.0, 1.0), (2.0, 1.0), (2.0, 0.5)], 1, 1) == (2.0, 0.55)
         assert SignalSpec._getVertexIntersPoint([(1.0, 1.0), (2.0, 1.0), (2.0, 0.5)], [(1.0, 0.0), (2.0, 0.0), (2.0, 0.6)], 1, 1) == (2.0, 0.55)
 
-        p = SignalSpec._getFillPathsBetween([(0.0, 1.0), (1.0, 1.0)],
-                                            [(0.0, 1.0), (1.0, 1.0)])
+        p, oL, oR = SignalSpec._getFillPathsBetween([(0.0, 1.0), (1.0, 1.0)],
+                                                    [(0.0, 1.0), (1.0, 1.0)])
         assert p == []
+        assert not oL and not oR
 
-        p = SignalSpec._getFillPathsBetween([(0.0, 1.0)],
-                                            [(0.0, 1.0), (1.0, 1.0)])
+        p, oL, oR = SignalSpec._getFillPathsBetween([(0.0, 1.0)],
+                                                    [(0.0, 1.0), (1.0, 1.0)])
         assert p == []
+        assert not oL and not oR
 
-        p = SignalSpec._getFillPathsBetween([(0.0, 1.0), (1.0, 1.0)],
-                                            [])
+        p, oL, oR = SignalSpec._getFillPathsBetween([(0.0, 1.0), (1.0, 1.0)],
+                                                    [])
         assert p == []
+        assert not oL and not oR
 
-        p = SignalSpec._getFillPathsBetween([(1.0, 1.0), (2.0, 1.0), (2.5, 0.5), (3.5, 0.5), (4.0, 0.0), (4.5, 0.25), (6.0, 1.0)],
-                                            [(1.0, 0.0), (2.0, 0.0), (2.5, 0.5), (3.5, 0.5), (4.0, 1.0), (6.0, 0.0)])
+        p, oL, oR = SignalSpec._getFillPathsBetween([(0.0, 1.0), (2.0, 1.0)],
+                                                    [(0.0, 0.0), (2.0, 0.0)])
+        assert p == [
+            [(0.0, 1.0), (0.0, 0.0), (2.0, 0.0), (2.0, 1.0)]
+        ]
+        assert oL
+        assert oR
+
+        p, oL, oR = SignalSpec._getFillPathsBetween([(0.0, 1.0), (2.0, 1.0), (2.0, 0.0)],
+                                                    [(0.0, 0.0), (2.0, 0.0)])
+        assert p == [
+            [(0.0, 1.0), (0.0, 0.0), (2.0, 0.0), (2.0, 1.0)]
+        ]
+        assert oL
+        assert not oR
+
+        p, oL, oR = SignalSpec._getFillPathsBetween([(0.0, 1.0), (0.0, 0.0), (2.0, 0.0)],
+                                                    [(0.0, 1.0), (2.0, 1.0)])
+        assert p == [
+            [(0.0, 1.0), (0.0, 0.0), (2.0, 0.0), (2.0, 1.0)]
+        ]
+        assert not oL
+        assert oR
+
+        p, oL, oR = SignalSpec._getFillPathsBetween([(0.0, 1.0), (0.0, 0.0), (2.0, 0.0), (2.0, 1.0)],
+                                                    [(0.0, 1.0), (2.0, 1.0)])
+        assert p == [
+            [(0.0, 1.0), (0.0, 0.0), (2.0, 0.0), (2.0, 1.0)]
+        ]
+        assert not oL
+        assert not oR
+
+        p, oL, oR = SignalSpec._getFillPathsBetween([(1.0, 1.0), (2.0, 1.0), (2.5, 0.5), (3.5, 0.5), (4.0, 0.0), (4.5, 0.25), (6.0, 1.0)],
+                                                    [(1.0, 0.0), (2.0, 0.0), (2.5, 0.5), (3.5, 0.5), (4.0, 1.0), (6.0, 0.0)])
         assert p == [
             [(1.0, 1.0), (1.0, 0.0), (2.0, 0.0), (2.5, 0.5), (2.0, 1.0)],
             [(3.5, 0.5), (4.0, 0.0), (5.0, 0.5), (4.0, 1.0)],
             [(5.0, 0.5), (6.0, 0.0), (6.0, 1.0)]
         ]
-        p = SignalSpec._getFillPathsBetween([(1.0, 0.0), (2.0, 0.0), (2.5, 0.5), (3.5, 0.5), (4.0, 1.0), (6.0, 0.0)],
-                                            [(1.0, 1.0), (2.0, 1.0), (2.5, 0.5), (3.5, 0.5), (4.0, 0.0), (4.5, 0.25), (6.0, 1.0)])
+        assert oL
+        assert oR
+
+        p, oL, oR = SignalSpec._getFillPathsBetween(
+            [(1.0, 0.0), (2.0, 0.0), (2.5, 0.5), (3.5, 0.5), (4.0, 1.0), (6.0, 0.0)],
+            [(1.0, 1.0), (2.0, 1.0), (2.5, 0.5), (3.5, 0.5), (4.0, 0.0), (4.5, 0.25), (6.0, 1.0)])
         assert p == [
             [(1.0, 1.0), (1.0, 0.0), (2.0, 0.0), (2.5, 0.5), (2.0, 1.0)],
             [(3.5, 0.5), (4.0, 0.0), (5.0, 0.5), (4.0, 1.0)],
             [(5.0, 0.5), (6.0, 0.0), (6.0, 1.0)]
         ]
+        assert oL
+        assert oR
 
-        p = SignalSpec._getFillPathsBetween([(0.0, 1.0), (1.0, 0.5), (5.0, 0.5)],
-                                            [(1.0, 0.0), (2.0, 0.0), (2.5, 0.5), (3.5, 0.5), (4.0, 1.0), (6.0, 0.0)])
+        p, oL, oR = SignalSpec._getFillPathsBetween(
+            [(0.0, 1.0), (1.0, 0.5), (5.0, 0.5)],
+            [(1.0, 0.0), (2.0, 0.0), (2.5, 0.5), (3.5, 0.5), (4.0, 1.0), (6.0, 0.0)])
         assert p == [
             [(0.0, 1.0), (1.0, 0.0), (2.0, 0.0), (2.5, 0.5), (1.0, 0.5)],
             [(3.5, 0.5), (5.0, 0.5), (4.0, 1.0)]
         ]
+        assert oL
+        assert not oR
 
-        p = SignalSpec._getFillPathsBetween([(0.0, 1.0), (3.0, 1.0), (4.5, 0.25), (6.0, 1.0)],
-                                            [(0.0, 0.5), (1.0, 0.5), (2.0, 1.0), (4.0, 0.0), (6.0, 1.0), (7.0, 1.0)])
+        p, oL, oR = SignalSpec._getFillPathsBetween(
+            [(0.0, 1.0), (3.0, 1.0), (4.5, 0.25), (6.0, 1.0)],
+            [(0.0, 0.5), (1.0, 0.5), (2.0, 1.0), (4.0, 0.0), (6.0, 1.0), (7.0, 1.0)])
         assert p == [
             [(0.0, 1.0), (0.0, 0.5), (1.0, 0.5), (2.0, 1.0)],
             [(2.0, 1.0), (4.0, 0.0), (4.5, 0.25), (3.0, 1.0)]
         ]
+        assert oL
+        assert not oR
 
-        p = SignalSpec._getFillPathsBetween([(1.0, 1.0), (3.0, 0.0), (3.0, 1.0), (5.0, 0.0)],
-                                            [(0.0, 0.0), (4.0, 1.0)])
+        p, oL, oR = SignalSpec._getFillPathsBetween([(1.0, 1.0), (3.0, 0.0), (3.0, 1.0), (5.0, 0.0)],
+                                                    [(0.0, 0.0), (4.0, 1.0)])
         assert len(p) == 4
         assert p[0] == [(1.0, 1.0), (0.0, 0.0), (2.0, 0.5)]
         assert p[1] == [(2.0, 0.5), (3.0, 0.0), (3.0, 0.75)]
@@ -847,6 +1004,8 @@ class SignalSpec(object):
         assert p[2][2:] == [(3.0, 1.0)]
         assert p[3][0] == p[2][1]
         assert p[3][1:] == [(4.0, 0.5), (5.0, 0.0), (4.0, 1.0)]
+        assert oL
+        assert oR
 
         assert SignalSpec()._getShadingRanges() == []
         assert SignalSpec([(0.0, '01'), (1.0, '10', True)])._getShadingRanges() == [(1, 2)]
@@ -922,7 +1081,7 @@ class SignalSpec(object):
         l = SignalSpec.createFromStr('0[0]X[1]1', 10.0).getAllPathVerticesAndShading(25.0)[1]
         assert l == []
 
-
+SignalSpecParser.testIt()
 SignalClusterSpecParser.testIt()
 SignalSpec.testIt()
 

@@ -471,10 +471,11 @@ class SignalClusterEditor(object):
                 invCharPosList = SignalClusterSpecParser.getInvalidCharPos(signalClusterSpecStr)
                 nonmatchingParenthesisIndex = SignalClusterSpecParser.getFirstNonmatchingParenthesis(signalClusterSpecStr)
                 invMultiStateRange = SignalClusterSpecParser.getFirstInvalidMultiPathState(signalClusterSpecStr)
+                invBreakRange = SignalClusterSpecParser.getFirstInvalidBreak(signalClusterSpecStr)
                 if len(invCharPosList) > 0:
                     showErrorDlg(u'Invalid character in signal cluster specification.',
                                  u'The valid characters are:\n'
-                               + u'white spaces, "0", "1", "-", "x", "X", "y", "Y", "(",  ")", "[", "]')
+                               + u'white spaces, "0", "1", "-", "x", "X", "y", "Y", "_", "(",  ")", "[", "]')
                     assert invCharPosList[0] < len(signalClusterSpecStr)
                     i = invCharPosList[0]
                     j = i + 1
@@ -496,8 +497,16 @@ class SignalClusterEditor(object):
                     selStart = textBuffer.get_iter_at_offset(invMultiStateRange[0])
                     selEnd = textBuffer.get_iter_at_offset(invMultiStateRange[1])
                     textBuffer.select_range(selStart, selEnd)
+                elif invBreakRange is not None:
+                    showErrorDlg(u'Invalid break.',
+                                 u'A valid break is a sequence of "_" and white space between states.\n'
+                               + u'Breaks at the beginning or at the end of a signal specification are invalid.')
+                    selStart = textBuffer.get_iter_at_offset(invBreakRange[0])
+                    selEnd = textBuffer.get_iter_at_offset(invBreakRange[1])
+                    textBuffer.select_range(selStart, selEnd)
                 else:
-                    showErrorDlg(u'Please enter a signal cluster specification.')
+                    showErrorDlg(u'Please enter a signal cluster specification.',
+                                 u'Don\'t know what is wrong (this is a bug; please report).')
                 self.signalClusterSpecTextView.scroll_mark_onscreen(textBuffer.get_insert())
                 paramNotebook.set_current_page(signalClusterSpecPageIndex)
                 self.signalClusterSpecTextView.grab_focus()
@@ -506,7 +515,7 @@ class SignalClusterEditor(object):
 
             elif not usrParams.isValid():
 
-                showErrorDlg(u'Invalid parameter.', 'Don\'t know which one (this is a bug; please report)')
+                showErrorDlg(u'Invalid parameter.', 'Don\'t know which one (this is a bug; please report).')
                 paramNotebook.set_current_page(layoutPageIndex)
                 usrParams = None
                 ok = False
