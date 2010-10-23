@@ -76,7 +76,7 @@ import re
 import inkex
 
 from ti_math import isfinite
-from ti_signalspec import SignalSpec, SignalClusterSpecParser
+from ti_signalspec import SignalSpec, SignalClusterSpecValidator
 from ti_pointtransform import PointTransf
 from ti_elem import Elem, PathElem, SignalGElem, SignalClusterGElem
 from ti_usrparams import UsrParams
@@ -334,7 +334,7 @@ class TiminkEffect(inkex.Effect):
             if r is not None:
 
                 signalClusterSpecStr, usrParams = r
-                signalSpecStrs = SignalClusterSpecParser.normalize(signalClusterSpecStr).split('\n')
+                signalSpecStrs = SignalClusterSpecValidator.normalize(signalClusterSpecStr).split('\n')
                 assert len(signalSpecStrs) > 0
 
                 if selectedSignalClusterGroup is None:

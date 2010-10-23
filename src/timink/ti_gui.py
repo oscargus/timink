@@ -29,7 +29,7 @@ except ImportError:
 from ti_info import EXTENSION_TITLE, VERSIONJOINT
 from ti_version import VersionJoint
 from ti_math import isfinite
-from ti_signalspec import SignalClusterSpecParser
+from ti_signalspec import SignalClusterSpecValidator
 from ti_usrparams import UsrParams
 
 class UserError(Exception):
@@ -466,12 +466,12 @@ class SignalClusterEditor(object):
                 usrParams.placementMethod = u'individual'
 
             ok = True
-            if not SignalClusterSpecParser.isValid(signalClusterSpecStr):
+            if not SignalClusterSpecValidator.isValid(signalClusterSpecStr):
 
-                invCharPosList = SignalClusterSpecParser.getInvalidCharPos(signalClusterSpecStr)
-                nonmatchingParenthesisIndex = SignalClusterSpecParser.getFirstNonmatchingParenthesis(signalClusterSpecStr)
-                invMultiStateRange = SignalClusterSpecParser.getFirstInvalidMultiPathState(signalClusterSpecStr)
-                invBreakRange = SignalClusterSpecParser.getFirstInvalidBreak(signalClusterSpecStr)
+                invCharPosList = SignalClusterSpecValidator.getInvalidCharPos(signalClusterSpecStr)
+                nonmatchingParenthesisIndex = SignalClusterSpecValidator.getFirstNonmatchingParenthesis(signalClusterSpecStr)
+                invMultiStateRange = SignalClusterSpecValidator.getFirstInvalidMultiPathState(signalClusterSpecStr)
+                invBreakRange = SignalClusterSpecValidator.getFirstInvalidBreak(signalClusterSpecStr)
                 if len(invCharPosList) > 0:
                     showErrorDlg(u'Invalid character in signal cluster specification.',
                                  u'The valid characters are:\n'
@@ -498,8 +498,8 @@ class SignalClusterEditor(object):
                     selEnd = textBuffer.get_iter_at_offset(invMultiStateRange[1])
                     textBuffer.select_range(selStart, selEnd)
                 elif invBreakRange is not None:
-                    showErrorDlg(u'Invalid break.',
-                                 u'A valid break is a sequence of "_" and white space between states.\n'
+                    showErrorDlg(u'Invalid signal break.',
+                                 u'A valid signal break is a sequence of "_" and white space between states.\n'
                                + u'Breaks at the beginning or at the end of a signal specification are invalid.')
                     selStart = textBuffer.get_iter_at_offset(invBreakRange[0])
                     selEnd = textBuffer.get_iter_at_offset(invBreakRange[1])
@@ -521,7 +521,7 @@ class SignalClusterEditor(object):
                 ok = False
 
             if ok:
-                signalClusterSpecStr = SignalClusterSpecParser.cleanUp(signalClusterSpecStr)
+                signalClusterSpecStr = SignalClusterSpecValidator.cleanUp(signalClusterSpecStr)
                 break
             else:
                 response = dlg.run()
@@ -532,7 +532,7 @@ class SignalClusterEditor(object):
 
         r = None
         if ok:
-            assert SignalClusterSpecParser.isValid(signalClusterSpecStr)
+            assert SignalClusterSpecValidator.isValid(signalClusterSpecStr)
             assert usrParams.isValid()
             r = (signalClusterSpecStr, usrParams)
         return r

@@ -146,7 +146,7 @@ class SignalSpecParser(object):
         assert SignalSpecParser.parse('_ _0', 10.0, 5.0) is None
         assert SignalSpecParser.parse('0_', 10.0, 5.0) is None
 
-class SignalClusterSpecParser(object):
+class SignalClusterSpecValidator(object):
     """
     Signal cluster specification.
 
@@ -167,7 +167,7 @@ class SignalClusterSpecParser(object):
     @staticmethod
     def normalize(signalClusterSpec):
         assert signalClusterSpec is not None
-        s = SignalClusterSpecParser.cleanUp(signalClusterSpec)
+        s = SignalClusterSpecValidator.cleanUp(signalClusterSpec)
         s = re.sub(' *', '', s)  # remove white space
         s = re.sub('\n+', '\n', s) # remove empty lines
         return s
@@ -241,7 +241,7 @@ class SignalClusterSpecParser(object):
     @staticmethod
     def isValid(signalClusterSpec):
         assert signalClusterSpec is not None
-        signalSpecs = SignalClusterSpecParser.normalize(signalClusterSpec).split('\n')
+        signalSpecs = SignalClusterSpecValidator.normalize(signalClusterSpec).split('\n')
         ok = len(signalSpecs) > 0
         i = 0
         while ok and i < len(signalSpecs):
@@ -251,61 +251,61 @@ class SignalClusterSpecParser(object):
 
     @staticmethod
     def testIt():
-        assert SignalClusterSpecParser.cleanUp('') == ''
-        assert SignalClusterSpecParser.cleanUp(' 0\t 1x AB  ') == ' 0  1x AB  '
-        assert SignalClusterSpecParser.cleanUp(' \t01xAB\nC\t \n  ') == '  01xAB\nC'
-        assert SignalClusterSpecParser.cleanUp('  \t\n\n 01xAB\nC\t \n  \t') == ' 01xAB\nC'
-        assert SignalClusterSpecParser.cleanUp('A\n\rB\r\nC\n\n\nC\r\r\rD') == 'A\n\nB\nC\n\nC\n\nD'
+        assert SignalClusterSpecValidator.cleanUp('') == ''
+        assert SignalClusterSpecValidator.cleanUp(' 0\t 1x AB  ') == ' 0  1x AB  '
+        assert SignalClusterSpecValidator.cleanUp(' \t01xAB\nC\t \n  ') == '  01xAB\nC'
+        assert SignalClusterSpecValidator.cleanUp('  \t\n\n 01xAB\nC\t \n  \t') == ' 01xAB\nC'
+        assert SignalClusterSpecValidator.cleanUp('A\n\rB\r\nC\n\n\nC\r\r\rD') == 'A\n\nB\nC\n\nC\n\nD'
 
-        assert SignalClusterSpecParser.normalize('') == ''
-        assert SignalClusterSpecParser.normalize(' \t ') == ''
-        assert SignalClusterSpecParser.normalize(' 0\t 1x AB  ') == '01xAB'
-        assert SignalClusterSpecParser.normalize(' \t01xAB\nC\t \n  ') == '01xAB\nC'
-        assert SignalClusterSpecParser.normalize('  \t\n\n 01xAB\nC\t \n  \t') == '01xAB\nC'
-        assert SignalClusterSpecParser.normalize('A\n\rB\r\nC\n\n\nC\r\r\rD') == 'A\nB\nC\nC\nD'
+        assert SignalClusterSpecValidator.normalize('') == ''
+        assert SignalClusterSpecValidator.normalize(' \t ') == ''
+        assert SignalClusterSpecValidator.normalize(' 0\t 1x AB  ') == '01xAB'
+        assert SignalClusterSpecValidator.normalize(' \t01xAB\nC\t \n  ') == '01xAB\nC'
+        assert SignalClusterSpecValidator.normalize('  \t\n\n 01xAB\nC\t \n  \t') == '01xAB\nC'
+        assert SignalClusterSpecValidator.normalize('A\n\rB\r\nC\n\n\nC\r\r\rD') == 'A\nB\nC\nC\nD'
 
-        assert SignalClusterSpecParser.getInvalidCharPos('') == []
-        assert SignalClusterSpecParser.getInvalidCharPos('01-xX') == []
-        assert SignalClusterSpecParser.getInvalidCharPos('0XB1xC') == [2, 5]
+        assert SignalClusterSpecValidator.getInvalidCharPos('') == []
+        assert SignalClusterSpecValidator.getInvalidCharPos('01-xX') == []
+        assert SignalClusterSpecValidator.getInvalidCharPos('0XB1xC') == [2, 5]
 
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('') == None
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0123xx?634') == None
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[123x][x?634]') == None
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1]2[3') == 5
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1]23]') == 6
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1[2[3]') == 3
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1]\n2[3]') == None
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1\n]2[3]') == 1
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1()]2[3]') == None
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1()]2[3])') == 10
-        assert SignalClusterSpecParser.getFirstNonmatchingParenthesis('0[1(]2[3])') == 4
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('') == None
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0123xx?634') == None
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0[123x][x?634]') == None
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0[1]2[3') == 5
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0[1]23]') == 6
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0[1[2[3]') == 3
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0[1]\n2[3]') == None
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0[1\n]2[3]') == 1
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0[1()]2[3]') == None
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0[1()]2[3])') == 10
+        assert SignalClusterSpecValidator.getFirstNonmatchingParenthesis('0[1(]2[3])') == 4
 
-        assert not SignalClusterSpecParser.isValid('')
-        assert not SignalClusterSpecParser.isValid('  ')
-        assert not SignalClusterSpecParser.isValid(' \t ')
-        assert SignalClusterSpecParser.isValid(' x 10 X- ')
-        assert not SignalClusterSpecParser.isValid(' \n  ')
-        assert SignalClusterSpecParser.isValid(' \n 1 ')
+        assert not SignalClusterSpecValidator.isValid('')
+        assert not SignalClusterSpecValidator.isValid('  ')
+        assert not SignalClusterSpecValidator.isValid(' \t ')
+        assert SignalClusterSpecValidator.isValid(' x 10 X- ')
+        assert not SignalClusterSpecValidator.isValid(' \n  ')
+        assert SignalClusterSpecValidator.isValid(' \n 1 ')
 
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('') is None
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X') is None
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X()Y') == (3, 5)
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-00-)Y') is None
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X( 0\t1 -0 0- )Y') is None
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-0)Y(-)') is None
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(01-0)Y(X-)') == (10, 14)
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X()') == (3, 5)
-        assert SignalClusterSpecParser.getFirstInvalidMultiPathState('01X(\n') == (3, 5)
+        assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('') is None
+        assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X') is None
+        assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X()Y') == (3, 5)
+        assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X(01-00-)Y') is None
+        assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X( 0\t1 -0 0- )Y') is None
+        assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X(01-0)Y(-)') is None
+        assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X(01-0)Y(X-)') == (10, 14)
+        assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X()') == (3, 5)
+        assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X(\n') == (3, 5)
 
-        assert SignalClusterSpecParser.getFirstInvalidBreak('') is None
-        assert SignalClusterSpecParser.getFirstInvalidBreak('0_1\n10-\r\n0__0_ _1') is None
-        assert SignalClusterSpecParser.getFirstInvalidBreak(' __ _0') == (1, 5)
-        assert SignalClusterSpecParser.getFirstInvalidBreak('0 _  __ ') == (2, 7)
-        assert SignalClusterSpecParser.getFirstInvalidBreak('0_1\n10-\r\n _\t_ 0__0_ _1') == (10, 13)
-        assert SignalClusterSpecParser.getFirstInvalidBreak('0_1_\n10-\r\n _\t_ 0__0_ _1') == (3, 4)
+        assert SignalClusterSpecValidator.getFirstInvalidBreak('') is None
+        assert SignalClusterSpecValidator.getFirstInvalidBreak('0_1\n10-\r\n0__0_ _1') is None
+        assert SignalClusterSpecValidator.getFirstInvalidBreak(' __ _0') == (1, 5)
+        assert SignalClusterSpecValidator.getFirstInvalidBreak('0 _  __ ') == (2, 7)
+        assert SignalClusterSpecValidator.getFirstInvalidBreak('0_1\n10-\r\n _\t_ 0__0_ _1') == (10, 13)
+        assert SignalClusterSpecValidator.getFirstInvalidBreak('0_1_\n10-\r\n _\t_ 0__0_ _1') == (3, 4)
 
-        assert SignalClusterSpecParser.isValid('-[X(01-)]0')
-        assert not SignalClusterSpecParser.isValid('-[X()]0')
+        assert SignalClusterSpecValidator.isValid('-[X(01-)]0')
+        assert not SignalClusterSpecValidator.isValid('-[X()]0')
 
 class SignalSpec(object):
     """
@@ -1082,6 +1082,6 @@ class SignalSpec(object):
         assert l == []
 
 SignalSpecParser.testIt()
-SignalClusterSpecParser.testIt()
+SignalClusterSpecValidator.testIt()
 SignalSpec.testIt()
 

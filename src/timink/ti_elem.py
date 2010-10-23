@@ -22,7 +22,7 @@ from ti_info import VERSIONJOINT
 from ti_version import VersionJoint
 from ti_math import isfinite
 from ti_pointtransform import PointTransf
-from ti_signalspec import SignalClusterSpecParser
+from ti_signalspec import SignalClusterSpecValidator
 from ti_usrparams import UsrParams
 
 NSS = inkex.NSS
@@ -655,7 +655,7 @@ class SignalClusterGElem(Elem):
                 pass
             if beStrict:
                 signalClusterSpecStr = attribDict.get(SignalClusterGElem._ATTRIBNAME_SIGNALCLUSTERSPEC, '')
-                ok = ok and SignalClusterSpecParser.isValid(signalClusterSpecStr)
+                ok = ok and SignalClusterSpecValidator.isValid(signalClusterSpecStr)
                 usrParams = attribDict.get(SignalClusterGElem._ATTRIBNAME_USRPARAMS, '')
                 usrParams = UsrParams.fromStr(usrParams)
                 ok = ok and usrParams is not None and usrParams.isValid()
@@ -681,7 +681,7 @@ class SignalClusterGElem(Elem):
         usrParams:  valid user params
         """
         assert self._node is not None
-        assert SignalClusterSpecParser.isValid(signalClusterSpecStr)
+        assert SignalClusterSpecValidator.isValid(signalClusterSpecStr)
         assert usrParams is not None and usrParams.isValid()
         attribDict = self._getAttribs()
         removedAttribSet = set(attribDict.keys()) - SignalClusterGElem._ATTRIBNAMESET
@@ -813,7 +813,7 @@ class SignalClusterGElem(Elem):
         Adds an empty (without child nodes) signal cluster group element and returns the new node.
         """
         parentNode = Elem(parentNode).getNode()
-        assert SignalClusterSpecParser.isValid(signalClusterSpecStr)
+        assert SignalClusterSpecValidator.isValid(signalClusterSpecStr)
         assert usrParams is not None and usrParams.isValid()
         signalGroup = SignalClusterGElem(inkex.etree.SubElement(parentNode, inkex.addNS('g','svg')))
         removedAttribSet = signalGroup.setAttribs(signalClusterSpecStr, usrParams)
