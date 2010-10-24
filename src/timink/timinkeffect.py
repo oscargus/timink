@@ -378,10 +378,10 @@ class TiminkEffect(inkex.Effect):
                     signalGroup, signalPaths, shading = sgInfoDict.get(signalIndex, (None, [], None))
                     signalOrigin = signalOriginDict[signalIndex]
 
-                    signalSpec = SignalSpec.createFromStr(signalSpecStrs[signalIndex], unitTimeWidth)
+                    signalSpec = SignalSpec.createFromStr(signalSpecStrs[signalIndex], unitTimeWidth, 5.0)#???
                     assert signalSpec is not None
-                    pathVerticesList, shading01VerticesList = signalSpec.getAllPathVerticesAndShading(edgeTimeWidth)
-                    pathNo = len(pathVerticesList)
+                    pathFragmentVerticesList, shading01VerticesList = signalSpec.getAllPathVerticesAndShading(edgeTimeWidth)
+                    pathNo = len(pathFragmentVerticesList)
 
                     # remove 'transform' of signal path and shading path
                     hadWasteTransf = False
@@ -427,11 +427,11 @@ class TiminkEffect(inkex.Effect):
                     assert styleTmplSignalIndex is None or styleTmplSignalIndex in sgInfoDict
 
                     for pathIndex in range(0, pathNo):
-                        pathVertices = pathVerticesList[pathIndex]
+                        pathFragmentVertices = pathFragmentVerticesList[pathIndex]
                         oldSignalPath = signalPaths[pathIndex]
                         if oldSignalPath is None:
                             # no old signal 'path' available -> create new one
-                            newSignalPath = signalGroup.addSignalPath(pathIndex, [pathVertices], -signalHeight, (0, 0))
+                            newSignalPath = signalGroup.addSignalPath(pathIndex, pathFragmentVertices, -signalHeight, (0, 0))
                             if styleTmplSignalIndex is not None:
                                 tmplSignalGroup, signalPathsOfTmplSignalGroup, shadingOfTmplSignalGroup \
                                     = sgInfoDict[styleTmplSignalIndex]
@@ -449,7 +449,7 @@ class TiminkEffect(inkex.Effect):
                                         emptySignalPath.copyStyleFrom(signalPathsOfTmplSignalGroup[pi])
                                         del emptySignalPath
                         else:
-                            newSignalPath = signalGroup.addSignalPath(pathIndex, [pathVertices], -signalHeight, (0, 0))
+                            newSignalPath = signalGroup.addSignalPath(pathIndex, pathFragmentVertices, -signalHeight, (0, 0))
                             if pathIndex == 0:
                                 newSignalPath.copyTransformFrom(oldSignalPath)
 

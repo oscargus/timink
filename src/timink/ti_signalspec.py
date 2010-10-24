@@ -29,12 +29,12 @@ class SignalSpecParser(object):
     @staticmethod
     def parse(signalSpecStr, unitTime, breakTime):
         """
-        Creates the state liste for SignalSpec from a signal specification (for one signal).
+        Creates the fragment state sequence for SignalSpec from a signal specification (for one signal).
 
         signalSpecStr: signal specification for one signal (exactly one non-empty line).
         unitTime: time for each state (> 0)
         breakTime: time for each break (> 0)
-        Returns: list of state lists for SignalSpec(), or None if signalSpecStr is not valid
+        Returns: list of state sequences for SignalSpec(), or None if signalSpecStr is not valid
         """
 
         assert isfinite(unitTime) and unitTime > 0.0
@@ -50,7 +50,7 @@ class SignalSpecParser(object):
             'y': '0110',
         }
 
-        statesList = []
+        fragmentStates = []
         incomplStates = []
         t = 0
         doShade = False
@@ -81,9 +81,9 @@ class SignalSpecParser(object):
                 elif c == '_':
                     if len(incomplStates) > 0:
                         incomplStates.append((t,) + incomplStates[-1][1:])
-                        statesList.append(incomplStates)
+                        fragmentStates.append(incomplStates)
                         incomplStates = []
-                    ok = multiStateStr is None and len(statesList) > 0
+                    ok = multiStateStr is None and len(fragmentStates) > 0
                     t = t + breakTime
                 elif multiStateStr is None:
                     incomplStates.append((t, STATESTRDICT[c], doShade))
@@ -99,13 +99,13 @@ class SignalSpecParser(object):
 
         if len(incomplStates) > 0:
             incomplStates.append((t,) + incomplStates[-1][1:])
-            statesList.append(incomplStates)
-        ok = ok and not doShade and multiStateStr is None and len(incomplStates) > 0 and len(statesList) > 0
+            fragmentStates.append(incomplStates)
+        ok = ok and not doShade and multiStateStr is None and len(incomplStates) > 0 and len(fragmentStates) > 0
 
         if not ok:
-            statesList = None
+            fragmentStates = None
 
-        return statesList
+        return fragmentStates
 
     @staticmethod
     def testIt():
@@ -310,27 +310,31 @@ class SignalClusterSpecValidator(object):
 class SignalSpec(object):
     """
     Signal specification.
+
+    The signal consists of _fragments_ separated by _breaks_.
+    Each fragment is described by the sequence of states.
     """
 
-    def __init__(self, states=[]):
-        self.states = []
-        for s in states:
-            self.append(s)
+    def __init__(self, fragmentStates=[]):
+        self.fragmentStates = []
+        for states in fragmentStates:
+            self.appendFragment(states)
 
-    def _getShadingRanges(self):
+    @staticmethod
+    def _getShadingRanges(states):
         """
-        Returns a list of pair-wise disjunct intervals of all indices i of self.states
-        with self.states[i][3] = True.
+        Returns a list of pair-wise disjunct intervals of all indices i of states
+        with states[i][3] = True.
 
         Returns:
           [(start ,  end ), ..., start   , end    )]
                  0      0             n-1     n-1
-          For each interval j: self.states[i][3] = True for each i with start_j <= i < end_j.
+          For each interval j: states[i][3] = True for each i with start_j <= i < end_j.
         """
         shadedRanges = []
         incomplStartIndex = None
-        for i in range(0, len(self.states)):
-            t, y, doShade = self.states[i]
+        for i in range(0, len(states)):
+            t, y, doShade = states[i]
             if doShade:
                 if incomplStartIndex is None:
                     incomplStartIndex = i
@@ -339,7 +343,7 @@ class SignalSpec(object):
                     shadedRanges.append((incomplStartIndex, i))
                     incomplStartIndex = None
         if incomplStartIndex is not None:
-            shadedRanges.append((incomplStartIndex, len(self.states)))
+            shadedRanges.append((incomplStartIndex, len(states)))
         return shadedRanges
 
     @staticmethod
@@ -385,33 +389,44 @@ class SignalSpec(object):
             v.append((t0, y0))
         return v
 
-    def append(self, p):
+    def appendFragment(self, states):
         """
-        Appends a state.
-        p:
-          (t, y) or (t, y, doShade), where t must be greater than that of the last element of
-          the current state list.
+        Appends the states of a fragment.
+
+        states: List of tuples (t, y) or (t, y, doShade), sorted by increasing t.
+                t of the first element must be greater than last element of the last fragment of
+                the current state sequence of this object.
         """
-        assert len(p) in (2, 3)
-        (t, stateStr, doShade) = (p + (False,))[:3]
-        assert isfinite(2 * t * t) # guarantees finite scalar products
-        assert len(stateStr) > 0
-        assert len(self.states) == 0 or t > self.states[-1][0]
-        reducedStateStr = SignalSpec._reduceToPeriod(stateStr)
-        doShade = doShade and len(reducedStateStr) >= 2 and reducedStateStr[0] != reducedStateStr[1]
-        if len(self.states) >= 2 and self.states[-2][1:] == self.states[-1][1:]:
-            del self.states[-1]
-        self.states.append((float(t), reducedStateStr, doShade))
+        assert len(states) > 0
+        assert len(self.fragmentStates) == 0 or states[0][0] > self.fragmentStates[-1][-1][0]
+        fragmentStates = []
+        for s in states:
+            assert len(s) in (2, 3)
+            (t, stateStr, doShade) = (s + (False,))[:3]
+            assert isfinite(2 * t * t) # guarantees finite scalar products
+            assert len(stateStr) > 0
+            assert len(fragmentStates) == 0 or t > fragmentStates[-1][0]
+            reducedStateStr = SignalSpec._reduceToPeriod(stateStr)
+            doShade = doShade and len(reducedStateStr) >= 2 and reducedStateStr[0] != reducedStateStr[1]
+            if len(fragmentStates) >= 2 and fragmentStates[-2][1:] == fragmentStates[-1][1:]:
+                del fragmentStates[-1]
+            fragmentStates.append((float(t), reducedStateStr, doShade))
+        self.fragmentStates.append(fragmentStates)
+
+    def getFragmentCount(self):
+        return len(self.fragmentStates)
 
     def getPeriod(self):
         """
-        Returns the smalles integer n, such that getPathVertices(i, ..) = getPathVertices(i + n)
-        for all i.
+        Returns the smalles integer n, such that getFragmPathVertices(j, i, ..) = getFragmPathVertices(j, i + n)
+        for all i and j.
         """
-        if len(self.states) > 0:
+        if len(self.fragmentStates) > 0:
             period = 1
-            for t, stateStr, doShade in self.states:
-                period = lcm(period, len(stateStr))
+            for states in self.fragmentStates:
+                assert len(states) > 0
+                for t, stateStr, doShade in states:
+                    period = lcm(period, len(stateStr))
         else:
             period = 0
         return period
@@ -680,49 +695,12 @@ class SignalSpec(object):
 
         return (fillPaths, isFirstShadingOpen, isLastShadingOpen)
 
-    def getAllPathVerticesAndShading(self, edgeTimeWidth):
+    def getFragmPathVertices(self, fragmentIndex, pathIndex, edgeTimeWidth):
         """
-        Returns all signal paths and the paths around all shaded areas between
-        signal paths 0 and 1.
+        Returns a vertex list representing signal path pathindex for the specified fragment
+        of this object.
 
-        Returns:
-          (pathVerticesList, shading01VerticesList).
-          pathVerticesList and shading01VerticesList are lists of list of vertices (t, y).
-        """
-        pathVerticesList = []
-        shading01VerticesList = []
-        for pathIndex in range(0, self.getPeriod()):
-            pathVerticesList.append(self.getPathVertices(pathIndex, edgeTimeWidth))
-        if len(pathVerticesList) >= 2:
-            for startIndex, endIndex in self._getShadingRanges():
-                startTimeBound = self.states[startIndex][0]
-                endTime = self.states[min(endIndex, len(self.states) - 1)][0]
-                startTime = min(startTimeBound + edgeTimeWidth,
-                                self.states[min(startIndex + 1, len(self.states) - 1)][0])
-                endTimeBound = min(endTime + edgeTimeWidth,
-                                   self.states[min(endIndex + 1, len(self.states) - 1)][0])
-                path0Sub = SignalSpec._getVerticesSlice(pathVerticesList[0], startTimeBound, endTimeBound)
-                path1Sub = SignalSpec._getVerticesSlice(pathVerticesList[1], startTimeBound, endTimeBound)
-                shading01Vertices, isFirstShadingOpen, isLastShadingOpen = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
-                if endTimeBound != endTime and len(shading01Vertices) > 0 and shading01Vertices[-1][0][0] < endTime and isLastShadingOpen:
-                    # last shading area starts before endTime and ends with path0Sub, path1Sub
-                    # -> no intersection after endTime
-                    # -> shorten to endTime
-                    path0Sub = SignalSpec._getVerticesSlice(pathVerticesList[0], startTimeBound, endTime)
-                    path1Sub = SignalSpec._getVerticesSlice(pathVerticesList[1], startTimeBound, endTime)
-                    shading01Vertices, isFirstShadingOpen, isLastShadingOpen = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
-                else:
-                    while len(shading01Vertices) > 1 and shading01Vertices[-1][0][0] > endTime:
-                        del shading01Vertices[-1]
-                if len(shading01Vertices) > 1 and shading01Vertices[1][0][0] < startTime:
-                    del shading01Vertices[0]
-                shading01VerticesList.extend(shading01Vertices)
-        return (pathVerticesList, shading01VerticesList)
-
-    def getPathVertices(self, pathIndex, edgeTimeWidth):
-        """
-        Returns a vertex list representing signal path pathindex of this object.
-
+        fragmentIndex: 0-based fragment index (0 .. getFragmentCount() - 1)
         pathIndex:     signal path index (non-negative integer)
         edgeTimeWidth: width of a complete rising or falling edge (finite and non-negative)
         Returns:
@@ -730,11 +708,13 @@ class SignalSpec(object):
           for all i with 0 <= i < n - 1.
           Empty or at least 2 elements.
         """
+        assert fragmentIndex >= 0 and fragmentIndex < len(self.fragmentStates)
         assert isfinite(edgeTimeWidth) and edgeTimeWidth >= 0.0
 
         def bound(x, a, b):
             return max(min(x, max(a, b)), min(a, b))
 
+        states = self.fragmentStates[fragmentIndex]
         vertices = []
 
         YDICT = { '0': 0.0, '1': 1.0, '-': 0.5 }
@@ -742,14 +722,14 @@ class SignalSpec(object):
         edges = []
         tPrev = None
         sPrev = None
-        for i in range(0, len(self.states)):
-            t, sVec, doShade = self.states[i]
+        for i in range(0, len(states)):
+            t, sVec, doShade = states[i]
             assert isfinite(2 * t * t)
             assert tPrev is None or tPrev < t
             assert len(sVec) > 0
             s = sVec[pathIndex % len(sVec)]
             assert s in YDICT
-            if (i == 0) or (s != sPrev) or (i + 1 == len(self.states) and tPrev < t):
+            if (i == 0) or (s != sPrev) or (i + 1 == len(states) and tPrev < t):
                 edges.append((t, YDICT[s]))
             tPrev = t
             sPrev = s
@@ -787,8 +767,75 @@ class SignalSpec(object):
 
         return vertices
 
+    def getAllPathVerticesAndShading(self, edgeTimeWidth):
+        """
+        Returns all signal paths and the paths around all shaded areas between
+        signal paths 0 and 1 of this object.
+
+        edgeTimeWidth: width of a complete rising or falling edge (finite and non-negative)
+
+        Returns:
+          (pathFragmentVerticesList, shading01VerticesList).
+
+          pathFragmentVerticesList[pathIndex][fragmentIndex] is a vertex list
+          for each pathIndex, fragmentIndex with 0 <= pathIndex < getPeriod()
+          and 0 <= fragmentIndex < getFragmentCount().
+          Each pathFragmentVerticesList[pathIndex][fragmentIndex] contains at least 2 elements.
+
+          pathFragmentVerticesList[areaIndex] is a vertex list for each areaIndex.
+          Each pathFragmentVerticesList[areaIndex] contains at least 3 elements
+          and describes a non-empty area between pathFragmentVerticesList[0][fragmentIndex] and
+          pathFragmentVerticesList[1][fragmentIndex] (if getPeriod() >= 2).
+        """
+
+        pathCount = self.getPeriod()
+
+        pathFragmentVerticesList = [] # pathFragmentVerticesList[pathIndex][fragmentIndex] is a vertex list
+        shading01VerticesList = [] # pathFragmentVerticesList[areaIndex] is a vertex list
+
+        for fragmentIndex in range(0, self.getFragmentCount()):
+
+            pathVerticesList = [] # pathVerticesList[pathIndex] is a vertex list
+            for pathIndex in range(0, pathCount):
+                pathVerticesList.append(self.getFragmPathVertices(fragmentIndex, pathIndex, edgeTimeWidth))
+
+            if pathCount >= 2:
+                states = self.fragmentStates[fragmentIndex]
+                for startIndex, endIndex in self._getShadingRanges(states):
+                    startTimeBound = states[startIndex][0]
+                    endTime = states[min(endIndex, len(states) - 1)][0]
+                    startTime = min(startTimeBound + edgeTimeWidth,
+                                    states[min(startIndex + 1, len(states) - 1)][0])
+                    endTimeBound = min(endTime + edgeTimeWidth,
+                                       states[min(endIndex + 1, len(states) - 1)][0])
+                    path0Sub = SignalSpec._getVerticesSlice(pathVerticesList[0], startTimeBound, endTimeBound)
+                    path1Sub = SignalSpec._getVerticesSlice(pathVerticesList[1], startTimeBound, endTimeBound)
+                    shading01Vertices, isFirstShadingOpen, isLastShadingOpen = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
+                    if endTimeBound != endTime and len(shading01Vertices) > 0 and shading01Vertices[-1][0][0] < endTime and isLastShadingOpen:
+                        # last shading area starts before endTime and ends with path0Sub, path1Sub
+                        # -> no intersection after endTime
+                        # -> shorten to endTime
+                        path0Sub = SignalSpec._getVerticesSlice(pathVerticesList[0], startTimeBound, endTime)
+                        path1Sub = SignalSpec._getVerticesSlice(pathVerticesList[1], startTimeBound, endTime)
+                        shading01Vertices, isFirstShadingOpen, isLastShadingOpen = SignalSpec._getFillPathsBetween(path0Sub, path1Sub)
+                    else:
+                        while len(shading01Vertices) > 1 and shading01Vertices[-1][0][0] > endTime:
+                            del shading01Vertices[-1]
+                    if len(shading01Vertices) > 1 and shading01Vertices[1][0][0] < startTime:
+                        del shading01Vertices[0]
+                    shading01VerticesList.extend(shading01Vertices)
+
+            if len(pathFragmentVerticesList) > 0:
+                for pathIndex in range(0, pathCount):
+                    pathFragmentVerticesList[pathIndex].append(pathVerticesList[pathIndex])
+            else:
+                for pathIndex in range(0, pathCount):
+                    pathFragmentVerticesList.append([pathVerticesList[pathIndex]])
+
+        return (pathFragmentVerticesList, shading01VerticesList)
+
     @staticmethod
-    def createFromStr(signalSpecStr, unitTime, breakTime=1.0):#???
+    def createFromStr(signalSpecStr, unitTime, breakTime):
         """
         Creates a SignalSpec object from a signal specification (for one signal).
 
@@ -801,11 +848,11 @@ class SignalSpec(object):
         assert isfinite(unitTime) and unitTime > 0.0
         assert isfinite(breakTime) and breakTime > 0.0
 
-        statesList = SignalSpecParser.parse(signalSpecStr, unitTime, breakTime)
-        if statesList is None:
+        fragmentStates = SignalSpecParser.parse(signalSpecStr, unitTime, breakTime)
+        if fragmentStates is None:
             s = None
         else:
-            s = SignalSpec(statesList[0])#???
+            s = SignalSpec(fragmentStates)
         return s
 
     @staticmethod
@@ -831,48 +878,67 @@ class SignalSpec(object):
         assert SignalSpec._removeCollinearVertices([(0.0, 0.25), (0.0, 0.25), (2.0, 0.75)]) == [(0.0, 0.25), (2.0, 0.75)]
         assert SignalSpec._removeCollinearVertices([(0.0, 0.25), (0.0, 0.25), (2.0, 0.75), (4.0, 0.75), (4.0, 0.75)]) == [(0.0, 0.25), (2.0, 0.75), (4.0, 0.75)]
 
-        assert SignalSpec([(0, '01')]).getPathVertices(3, 0.0) == []
-        s = SignalSpec([(0, '0'), (2, '1'), (3, '1')])
-        assert s.getPathVertices(0, 0) == [(0.0, 0.0), (2.0, 0.0), (2.0, 1.0), (3.0, 1.0)]
-        assert s.getPathVertices(0, 0.5) == [(0.0, 0.0), (2.0, 0.0), (2.5, 1.0), (3.0, 1.0)]
-        assert s.getPathVertices(0, 0.0) == [(0.0, 0.0), (2.0, 0.0), (2.0, 1.0), (3.0, 1.0)]
-        s = SignalSpec([(0, '-'), (2, '1'), (3, '0'), (5, '1')])
-        assert s.getPathVertices(0, 0) == [(0.0, 0.5), (2.0, 0.5), (2.0, 1.0), (3.0, 1.0), (3.0, 0.0), (5.0, 0.0)]
-        assert s.getPathVertices(0, 0.5) == [(0.0, 0.5), (2.0, 0.5), (2.25, 1.0), (3.0, 1.0), (3.5, 0.0), (5.0, 0.0)]
-        assert s.getPathVertices(0, 2.0) == [(0.0, 0.5), (2.0, 0.5), (3.0, 1.0), (5.0, 0.0)]
-        assert s.getPathVertices(0, 4.0) == [(0.0, 0.5), (2.0, 0.5), (3.0, 0.75), (5.0, 0.25)]
+        assert SignalSpec([[(0, '01')]]).getFragmPathVertices(0, 3, 0.0) == []
+        s = SignalSpec([[(0, '0'), (2, '1'), (3, '1')]])
+        assert s.getFragmPathVertices(0, 0, 0) == [(0.0, 0.0), (2.0, 0.0), (2.0, 1.0), (3.0, 1.0)]
+        assert s.getFragmPathVertices(0, 0, 0.5) == [(0.0, 0.0), (2.0, 0.0), (2.5, 1.0), (3.0, 1.0)]
+        assert s.getFragmPathVertices(0, 0, 0.0) == [(0.0, 0.0), (2.0, 0.0), (2.0, 1.0), (3.0, 1.0)]
+        s = SignalSpec([[(0, '-'), (2, '1'), (3, '0'), (5, '1')]])
+        assert s.getFragmPathVertices(0, 0, 0) == [(0.0, 0.5), (2.0, 0.5), (2.0, 1.0), (3.0, 1.0), (3.0, 0.0), (5.0, 0.0)]
+        assert s.getFragmPathVertices(0, 0, 0.5) == [(0.0, 0.5), (2.0, 0.5), (2.25, 1.0), (3.0, 1.0), (3.5, 0.0), (5.0, 0.0)]
+        assert s.getFragmPathVertices(0, 0, 2.0) == [(0.0, 0.5), (2.0, 0.5), (3.0, 1.0), (5.0, 0.0)]
+        assert s.getFragmPathVertices(0, 0, 4.0) == [(0.0, 0.5), (2.0, 0.5), (3.0, 0.75), (5.0, 0.25)]
 
-        assert SignalSpec([(0, '0101'), (1, '01'), (2, '010101')]).states == [(0.0, '01', False), (2.0, '01', False)]
-        assert SignalSpec([(0, '0101'), (1, '01', True), (2, '010101')]).states == [(0.0, '01', False), (1.0, '01', True), (2.0, '01', False)]
-        assert SignalSpec.createFromStr('0011', 10.0).states == [(0.0, '0', False), (20.0, '1', False), (40.0, '1', False)]
-        assert SignalSpec.createFromStr('01-Xx', 10.0).states == [
+        assert SignalSpec([[(0, '0101'), (1, '01'), (2, '010101')]]).fragmentStates == [[(0.0, '01', False), (2.0, '01', False)]]
+        assert SignalSpec([[(0, '0101'), (1, '01', True), (2, '010101')]]).fragmentStates == [[(0.0, '01', False), (1.0, '01', True), (2.0, '01', False)]]
+        assert SignalSpec.createFromStr('0011', 10.0, 5.0).fragmentStates == [[
+            (0.0, '0', False), (20.0, '1', False), (40.0, '1', False)
+        ]]
+        assert SignalSpec.createFromStr('01-Xx', 10.0, 5.0).fragmentStates == [[
             (0.0, '0', False), (10.0, '1', False), (20.0, '-', False), (30.0, '10', False),
             (40.0, '01', False), (50.0, '01', False)
-        ]
-        assert SignalSpec.createFromStr('-[X(01-)]0', 10.0).states == [
+        ]]
+        l = SignalSpec.createFromStr('-[X(01-)]0', 10.0, 5.0).fragmentStates == [[
             (0.0, '-', False),
             (10.0, '10', True),
             (20.0, '01-', True),
             (30.0, '0', False),
             (40.0, '0', False)
+        ]]
+        l = SignalSpec.createFromStr('0_1__Xx', 10.0, 5.0).fragmentStates
+        assert l == [
+            [(0.0, '0', False), (10.0, '0', False)],
+            [(15.0, '1', False), (25.0, '1', False)],
+            [(35.0, '10', False), (45.0, '01', False), (55.0, '01', False)]
         ]
-        assert SignalSpec.createFromStr('-[X()]0', 10.0) is None
-        assert SignalSpec.createFromStr('-[X]0(', 10.0) is None
-        assert SignalSpec.createFromStr('(10X)', 10.0) is None
-        assert SignalSpec.createFromStr('(X10)', 10.0) is None
-        assert SignalSpec.createFromStr(' ( 0 1- ) ', 10.0) is not None
-        assert SignalSpec.createFromStr('', 10.0) is None
-        assert SignalSpec.createFromStr('01\n0', 10.0) is None
+        l = SignalSpec.createFromStr('0[_X__X]x', 10.0, 5.0).fragmentStates
+        assert l == [
+            [(0.0, '0', False), (10.0, '0', False)],
+            [(15.0, '10', True), (25.0, '10', True)],
+            [(35.0, '10', True), (45.0, '01', False), (55.0, '01', False)]
+        ]
+        assert SignalSpec.createFromStr('-[X()]0', 10.0, 5.0) is None
+        assert SignalSpec.createFromStr('-[X]0(', 10.0, 5.0) is None
+        assert SignalSpec.createFromStr('(10X)', 10.0, 5.0) is None
+        assert SignalSpec.createFromStr('(X10)', 10.0, 5.0) is None
+        assert SignalSpec.createFromStr(' ( 0 1- ) ', 10.0, 5.0) is not None
+        assert SignalSpec.createFromStr('', 10.0, 5.0) is None
+        assert SignalSpec.createFromStr('01\n0', 10.0, 5.0) is None
 
-        s = SignalSpec.createFromStr('Xx', 1.0)
-        assert s.states == [(0.0, '10', False), (1.0, '01', False), (2.0, '01', False)]
-        assert s.getPathVertices(0, 0) == [(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (2.0, 0.0)]
-        assert s.getPathVertices(1, 0) == [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (2.0, 1.0)]
-        assert s.getPathVertices(2, 0) == [(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (2.0, 0.0)]
+        s = SignalSpec.createFromStr('Xx', 1.0, 5.0)
+        assert s.fragmentStates == [[(0.0, '10', False), (1.0, '01', False), (2.0, '01', False)]]
+        assert s.getFragmPathVertices(0, 0, 0) == [(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (2.0, 0.0)]
+        assert s.getFragmPathVertices(0, 1, 0) == [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (2.0, 1.0)]
+        assert s.getFragmPathVertices(0, 2, 0) == [(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (2.0, 0.0)]
 
         assert SignalSpec().getPeriod() == 0
-        assert SignalSpec([(0.0, '0')]).getPeriod() == 1
-        assert SignalSpec([(0.0, '0'), (1.0, '10'), (2.0, '101')]).getPeriod() == 6
+        assert SignalSpec([[(0.0, '0')]]).getPeriod() == 1
+        assert SignalSpec([[(0.0, '0'), (1.0, '10'), (2.0, '101')]]).getPeriod() == 6
+        l = [
+            [(0.0, '0'), (1.0, '10'), (2.0, '101')],
+            [(3.0, '0001')]
+        ]
+        assert SignalSpec(l).getPeriod() == 12
 
         assert SignalSpec._interpolateAt([(0.0, 0.0), (1.0, 0.5), (2.0, 1.0)], 1, 1.0) == 0.5
         assert SignalSpec._interpolateAt([(0.0, 0.0), (1.0, 0.5), (2.0, 1.0)], 1, 2.0) == 1.0
@@ -1007,39 +1073,43 @@ class SignalSpec(object):
         assert oL
         assert oR
 
-        assert SignalSpec()._getShadingRanges() == []
-        assert SignalSpec([(0.0, '01'), (1.0, '10', True)])._getShadingRanges() == [(1, 2)]
-        assert SignalSpec([(0.0, '01'), (1.0, '10', True), (2.0, '01', True)])._getShadingRanges() == [(1, 3)]
-        l = [(0.0, '01', True), (1.0, '10'), (2.0, '01', True), (3.0, '10', True), (4.0, '01'), (5.0, '10')]
-        assert SignalSpec(l)._getShadingRanges() == [(0, 1), (2, 4)]
-        assert SignalSpec([(0.0, '0', True), (1.0, '1', True), (2.0, '110', True)])._getShadingRanges() == []
+        assert SignalSpec._getShadingRanges([]) == []
+        l = SignalSpec([[(0.0, '01'), (1.0, '10', True)]]).fragmentStates[0]
+        assert SignalSpec._getShadingRanges(l) == [(1, 2)]
+        l = SignalSpec([[(0.0, '01'), (1.0, '10', True), (2.0, '01', True)]]).fragmentStates[0]
+        assert SignalSpec._getShadingRanges(l) == [(1, 3)]
+        l = SignalSpec([[(0.0, '01', True), (1.0, '10'), (2.0, '01', True), (3.0, '10', True), (4.0, '01'), (5.0, '10')]]).fragmentStates[0]
+        assert SignalSpec._getShadingRanges(l) == [(0, 1), (2, 4)]
+        l = SignalSpec([[(0.0, '0', True), (1.0, '1', True), (2.0, '110', True)]]).fragmentStates[0]
+        assert SignalSpec._getShadingRanges(l) == []
 
-        s = [
+        s = [[
             (0.0, '0'), (1.0, '01', True), (3.0, '10'), (4.0, '01'),
             (5.0, '10', True), (7.0, '10', True)
-        ]
+        ]]
         l = SignalSpec(s).getAllPathVerticesAndShading(1.5)[1]
         assert l == [
             [(1.0, 0.0), (3.0, 0.0), (3.75, 0.5), (3.0, 1.0), (2.5, 1.0)],
             [(5.75, 0.5), (6.5, 0.0), (7.0, 0.0), (7.0, 1.0), (6.5, 1.0)]
         ]
 
-        l = SignalSpec.createFromStr('[x]', 1.0).getAllPathVerticesAndShading(1.0)[1]
+        l = SignalSpec.createFromStr('[x]', 1.0, 5.0).getAllPathVerticesAndShading(1.0)[1]
         assert l == [[(0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0)]]
-        l = SignalSpec.createFromStr('[X]', 1.0).getAllPathVerticesAndShading(1.0)[1]
+        l = SignalSpec.createFromStr('[X]', 1.0, 5.0).getAllPathVerticesAndShading(1.0)[1]
         assert l == [[(0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0)]]
 
-        l = SignalSpec.createFromStr('x[XxX]x', 10.0).getAllPathVerticesAndShading(0.0)[1]
+        l = SignalSpec.createFromStr('x[XxX]x', 10.0, 5.0).getAllPathVerticesAndShading(0.0)[1]
         assert l == [
             [(10.0, 1.0), (10.0, 0.0), (20.0, 0.0), (20.0, 1.0)],
             [(20.0, 1.0), (20.0, 0.0), (30.0, 0.0), (30.0, 1.0)],
             [(30.0, 0.0), (40.0, 0.0), (40.0, 1.0), (30.0, 1.0)]
         ]
-        l = SignalSpec.createFromStr('x[XxX]x', 10.0).getAllPathVerticesAndShading(5.0)[1]
+        l = SignalSpec.createFromStr('x[XxX]x', 10.0, 5.0).getAllPathVerticesAndShading(5.0)[1]
         assert l == [
             [(12.5, 0.5), (15.0, 0.0), (20.0, 0.0), (22.5, 0.5), (20.0, 1.0), (15.0, 1.0)],
             [(22.5, 0.5), (25.0, 0.0), (30.0, 0.0), (32.5, 0.5), (30.0, 1.0), (25.0, 1.0)],
-            [(32.5, 0.5), (35.0, 0.0), (40.0, 0.0), (42.5, 0.5), (40.0, 1.0), (35.0, 1.0)]]
+            [(32.5, 0.5), (35.0, 0.0), (40.0, 0.0), (42.5, 0.5), (40.0, 1.0), (35.0, 1.0)]
+        ]
 
         def verticesListEqual(vLA, vLB, absTTol, absYTol):
             same = False
@@ -1060,26 +1130,41 @@ class SignalSpec(object):
                     i = i + 1
             return same
 
-        l = SignalSpec.createFromStr('x[XxX]x', 10.0).getAllPathVerticesAndShading(15.0)[1]
+        l = SignalSpec.createFromStr('x[XxX]x', 10.0, 5.0).getAllPathVerticesAndShading(15.0)[1]
         lExpected = [
             [(17.5, 0.5), (20.0, 1.0 / 3.0), (22.5, 0.5), (20.0, 2.0 / 3.0)],
             [(22.5, 0.5), (30.0, 0.0), (37.5, 0.5), (30.0, 1.0)], [(37.5, 0.5), (40.0, 1.0 / 3.0), (42.5, 0.5), (40.0, 2.0 / 3.0)]
         ]
         assert verticesListEqual(l, lExpected, 1e-6, 1e-6)
 
-        l = SignalSpec.createFromStr('x[XxX]x', 10.0).getAllPathVerticesAndShading(25.0)[1]
+        l = SignalSpec.createFromStr('x[XxX]x', 10.0, 5.0).getAllPathVerticesAndShading(25.0)[1]
         lExpected = [
             [(10.0, 1.0), (10.0, 0.0), (20.0, 0.4), (30.0, 0.0), (40.0, 0.4), (40.0, 0.6), (30.0, 1.0), (20.0, 0.6)]
         ]
         assert verticesListEqual(l, lExpected, 1e-6, 1e-6)
-        l = SignalSpec.createFromStr('x[X]x[X]xx', 10.0).getAllPathVerticesAndShading(25.0)[1]
+        l = SignalSpec.createFromStr('x[X]x[X]xx', 10.0, 5.0).getAllPathVerticesAndShading(25.0)[1]
         lExpected = [
             [(10.0, 1.0), (10.0, 0.0), (20.0, 0.4), (20.0, 0.6)], [(30.0, 1.0), (30.0, 0.0), (40.0, 0.4), (40.0, 0.6)]
         ]
         assert verticesListEqual(l, lExpected, 1e-6, 1e-6)
 
-        l = SignalSpec.createFromStr('0[0]X[1]1', 10.0).getAllPathVerticesAndShading(25.0)[1]
+        l = SignalSpec.createFromStr('0[0]X[1]1', 10.0, 5.0).getAllPathVerticesAndShading(25.0)[1]
         assert l == []
+
+        l = SignalSpec.createFromStr('0(01)(10)', 10.0, 5.0).getAllPathVerticesAndShading(0.0)
+        assert l[0] == [
+            [[(0.0, 0.0), (20.0, 0.0), (20.0, 1.0), (30.0, 1.0)]],
+            [[(0.0, 0.0), (10.0, 0.0), (10.0, 1.0), (20.0, 1.0), (20.0, 0.0), (30.0, 0.0)]]
+        ]
+        l = SignalSpec.createFromStr('0[(01)_(10)]', 10.0, 5.0).getAllPathVerticesAndShading(0.0)
+        assert l[0] == [
+            [[(0.0, 0.0), (20.0, 0.0)], [(25.0, 1.0), (35.0, 1.0)]],
+            [[(0.0, 0.0), (10.0, 0.0), (10.0, 1.0), (20.0, 1.0)], [(25.0, 0.0), (35.0, 0.0)]]
+        ]
+        assert l[1] == [
+            [(10.0, 1.0), (10.0, 0.0), (20.0, 0.0), (20.0, 1.0)],
+            [(25.0, 1.0), (25.0, 0.0), (35.0, 0.0), (35.0, 1.0)]
+        ]
 
 SignalSpecParser.testIt()
 SignalClusterSpecValidator.testIt()

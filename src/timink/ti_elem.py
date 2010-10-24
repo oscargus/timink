@@ -383,8 +383,8 @@ class PathElem(Elem):
         Inserts a 'path' element below parentNode, consisting of line segments
         according to the given vertices.
 
-        verticesList is a (possibly empty) list of vertices.
-        Each vertices is a list of at least 2 tuples (x, y) of vertex positions.
+        verticesList is a (possibly empty) list of vertex lists.
+        Each vertex list is a list of at least 2 tuples (x, y) of vertex positions.
         The y-coordinates are inverted (increase: towards the top of the canvas).
 
         startPoint is None or (startPointX, startPointY).
@@ -557,8 +557,8 @@ class SignalGElem(Elem):
         Inserts a signal path element below this node, consisting of line segments
         according to the given vertices.
 
-        verticesList is a (possibly) empty list of vertices.
-        Each vertices is a list of at least 2 tuples (x, y) of vertex positions.
+        verticesList is a (possibly) empty list of vertex lists.
+        Each vertex list is a list of at least 2 tuples (x, y) of vertex positions.
         The y-coordinates are inverted (increase: towards the top of the canvas).
 
         startPoint is None or (startPointX, startPointY).
@@ -583,8 +583,8 @@ class SignalGElem(Elem):
         Inserts a shading path element below this node, consisting of line segments
         according to the given point vertices.
 
-        verticesList is a (possibly empty) list of vertices.
-        Each vertices is a list of at least 2 tuples (x, y) of vertex positions.
+        verticesList is a (possibly empty) list of vertex lists.
+        Each vertex list is a list of at least 2 tuples (x, y) of vertex positions.
         The y-coordinates are inverted (increase: towards the top of the canvas).
 
         startPoint is None or (startPointX, startPointY).
