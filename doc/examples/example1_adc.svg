@@ -17,7 +17,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.47 r22583"
-   sodipodi:docname="example1-adc_.svg">
+   sodipodi:docname="example1_adc.svg">
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -27,7 +27,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="4.6"
      inkscape:cx="122.7615"
-     inkscape:cy="663.38014"
+     inkscape:cy="662.51057"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -81,6 +81,13 @@
   </sodipodi:namedview>
   <defs
      id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 500 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1000 : 500 : 1"
+       inkscape:persp3d-origin="500 : 333.33333 : 1"
+       id="perspective188" />
     <marker
        id="ArrowRound1MStart"
        orient="auto">
@@ -181,78 +188,78 @@
     <g
        transform="translate(-2,-9.6378174)"
        id="g2862"
-       ns0:version="0.1.0/1.0"
+       ns0:version="0.2.0/1.1"
        ns0:signalclusterspec=" 11 0000 0000 0000 0000 0000 0000 0000 0000 0011\n 00 0011 0011 0011 0011 0011 0011 0011 0011 0000\n[xx]XXXX xxxx XXXX xxxx XXXX[xxxx xxxx xxxx xxxx]\n -- -XXXX xxxx XXXX xxxx XXXX xxxx XXXX xxxx 000"
-       ns0:usrparams="edgeTimeWidth:2.0px;originDistX:0.0px;originDistY:20.0px;placementMethod:homogeneous;signalHeight:10.0px;unitTimeWidth:5.0px">
+       ns0:usrparams="breakTimeWidth:2.0px;edgeTimeWidth:2.0px;originDistX:0.0px;originDistY:20.0px;placementMethod:homogeneous;signalHeight:10.0px;unitTimeWidth:5.0px">
       <g
          id="g2876"
          transform="translate(52,412)"
          inkscape:label="signalgroup2">
         <path
-           d="M 0,0 M 0.0,-10.0 L 0.0,0.0 L 10.0,0.0 L 11.0,-5.0 L 10.0,-10.0 Z M 0,0 M 111.0,-5.0 L 112.0,0.0 L 190.0,0.0 L 190.0,-10.0 L 112.0,-10.0 Z"
-           inkscape:label="shadingpath"
+           id="path3400"
            style="stroke:none;fill:url(#StripesGray45Degree);fill-opacity:1.0"
-           id="path6802" />
+           inkscape:label="shadingpath"
+           d="M 0,0 M 0.0,-10.0 L 0.0,0.0 L 10.0,0.0 L 11.0,-5.0 L 10.0,-10.0 Z M 0,0 M 111.0,-5.0 L 112.0,0.0 L 190.0,0.0 L 190.0,-10.0 L 112.0,-10.0 Z" />
         <path
-           d="M 0,0 M 0.0,-10.0 L 10.0,-10.0 L 12.0,0.0 L 30.0,0.0 L 32.0,-10.0 L 50.0,-10.0 L 52.0,0.0 L 70.0,0.0 L 72.0,-10.0 L 90.0,-10.0 L 92.0,0.0 L 110.0,0.0 L 112.0,-10.0 L 190.0,-10.0"
-           inkscape:label="signalpath1"
+           style="stroke:#000000;fill:none"
            id="path2880"
-           style="stroke:#000000;fill:none" />
+           inkscape:label="signalpath1"
+           d="M 0,0 M 0.0,-10.0 L 10.0,-10.0 L 12.0,0.0 L 30.0,0.0 L 32.0,-10.0 L 50.0,-10.0 L 52.0,0.0 L 70.0,0.0 L 72.0,-10.0 L 90.0,-10.0 L 92.0,0.0 L 110.0,0.0 L 112.0,-10.0 L 190.0,-10.0" />
         <path
-           d="M 0.0,0.0 L 10.0,0.0 L 12.0,-10.0 L 30.0,-10.0 L 32.0,0.0 L 50.0,0.0 L 52.0,-10.0 L 70.0,-10.0 L 72.0,0.0 L 90.0,0.0 L 92.0,-10.0 L 110.0,-10.0 L 112.0,0.0 L 190.0,0.0"
-           inkscape:label="signalpath0"
+           style="stroke:#000000;fill:none"
            id="path2882"
-           style="stroke:#000000;fill:none" />
+           inkscape:label="signalpath0"
+           d="M 0.0,0.0 L 10.0,0.0 L 12.0,-10.0 L 30.0,-10.0 L 32.0,0.0 L 50.0,0.0 L 52.0,-10.0 L 70.0,-10.0 L 72.0,0.0 L 90.0,0.0 L 92.0,-10.0 L 110.0,-10.0 L 112.0,0.0 L 190.0,0.0" />
       </g>
       <g
          inkscape:label="signalgroup0"
          transform="translate(52.0,372.0)"
          id="g5214">
         <path
-           d=""
-           inkscape:label="shadingpath"
+           id="path3405"
            style="stroke:none;fill:url(#StripesGray45Degree);fill-opacity:1.0"
-           id="path6807" />
+           inkscape:label="shadingpath"
+           d="" />
         <path
-           d="M 0,0 M 0.0,-10.0 L 10.0,-10.0 L 12.0,0.0 L 180.0,0.0 L 182.0,-10.0 L 190.0,-10.0"
-           inkscape:label="signalpath0"
+           style="stroke:#000000;fill:none"
            id="path5218"
-           style="stroke:#000000;fill:none" />
+           inkscape:label="signalpath0"
+           d="M 0,0 M 0.0,-10.0 L 10.0,-10.0 L 12.0,0.0 L 180.0,0.0 L 182.0,-10.0 L 190.0,-10.0" />
       </g>
       <g
          inkscape:label="signalgroup1"
          transform="translate(52.0,392.0)"
          id="g5222">
         <path
-           d=""
-           inkscape:label="shadingpath"
+           id="path3409"
            style="stroke:none;fill-opacity:1.0;fill:url(#StripesGray45Degree)"
-           id="path6811" />
+           inkscape:label="shadingpath"
+           d="" />
         <path
-           d="M 0.0,0.0 L 20.0,0.0 L 22.0,-10.0 L 30.0,-10.0 L 32.0,0.0 L 40.0,0.0 L 42.0,-10.0 L 50.0,-10.0 L 52.0,0.0 L 60.0,0.0 L 62.0,-10.0 L 70.0,-10.0 L 72.0,0.0 L 80.0,0.0 L 82.0,-10.0 L 90.0,-10.0 L 92.0,0.0 L 100.0,0.0 L 102.0,-10.0 L 110.0,-10.0 L 112.0,0.0 L 120.0,0.0 L 122.0,-10.0 L 130.0,-10.0 L 132.0,0.0 L 140.0,0.0 L 142.0,-10.0 L 150.0,-10.0 L 152.0,0.0 L 160.0,0.0 L 162.0,-10.0 L 170.0,-10.0 L 172.0,0.0 L 190.0,0.0"
-           inkscape:label="signalpath0"
+           style="stroke:#000000;fill:none"
            id="path5226"
-           style="stroke:#000000;fill:none" />
+           inkscape:label="signalpath0"
+           d="M 0.0,0.0 L 20.0,0.0 L 22.0,-10.0 L 30.0,-10.0 L 32.0,0.0 L 40.0,0.0 L 42.0,-10.0 L 50.0,-10.0 L 52.0,0.0 L 60.0,0.0 L 62.0,-10.0 L 70.0,-10.0 L 72.0,0.0 L 80.0,0.0 L 82.0,-10.0 L 90.0,-10.0 L 92.0,0.0 L 100.0,0.0 L 102.0,-10.0 L 110.0,-10.0 L 112.0,0.0 L 120.0,0.0 L 122.0,-10.0 L 130.0,-10.0 L 132.0,0.0 L 140.0,0.0 L 142.0,-10.0 L 150.0,-10.0 L 152.0,0.0 L 160.0,0.0 L 162.0,-10.0 L 170.0,-10.0 L 172.0,0.0 L 190.0,0.0" />
       </g>
       <g
          inkscape:label="signalgroup3"
          transform="translate(52.0,432.0)"
          id="g5228">
         <path
-           d=""
-           inkscape:label="shadingpath"
+           id="path3413"
            style="stroke:none;fill-opacity:1.0;fill:url(#StripesGray45Degree)"
-           id="path6815" />
+           inkscape:label="shadingpath"
+           d="" />
         <path
-           d="M 0,0 M 0.0,-5.0 L 15.0,-5.0 L 16.0,0.0 L 35.0,0.0 L 37.0,-10.0 L 55.0,-10.0 L 57.0,0.0 L 75.0,0.0 L 77.0,-10.0 L 95.0,-10.0 L 97.0,0.0 L 115.0,0.0 L 117.0,-10.0 L 135.0,-10.0 L 137.0,0.0 L 155.0,0.0 L 157.0,-10.0 L 175.0,-10.0 L 177.0,0.0 L 190.0,0.0"
-           inkscape:label="signalpath1"
+           style="stroke:#000000;fill:none"
            id="path5232"
-           style="stroke:#000000;fill:none" />
+           inkscape:label="signalpath1"
+           d="M 0,0 M 0.0,-5.0 L 15.0,-5.0 L 16.0,0.0 L 35.0,0.0 L 37.0,-10.0 L 55.0,-10.0 L 57.0,0.0 L 75.0,0.0 L 77.0,-10.0 L 95.0,-10.0 L 97.0,0.0 L 115.0,0.0 L 117.0,-10.0 L 135.0,-10.0 L 137.0,0.0 L 155.0,0.0 L 157.0,-10.0 L 175.0,-10.0 L 177.0,0.0 L 190.0,0.0" />
         <path
-           d="M 0,0 M 0.0,-5.0 L 15.0,-5.0 L 16.0,-10.0 L 35.0,-10.0 L 37.0,0.0 L 55.0,0.0 L 57.0,-10.0 L 75.0,-10.0 L 77.0,0.0 L 95.0,0.0 L 97.0,-10.0 L 115.0,-10.0 L 117.0,0.0 L 135.0,0.0 L 137.0,-10.0 L 155.0,-10.0 L 157.0,0.0 L 190.0,0.0"
-           inkscape:label="signalpath0"
+           style="stroke:#000000;fill:none"
            id="path5234"
-           style="stroke:#000000;fill:none" />
+           inkscape:label="signalpath0"
+           d="M 0,0 M 0.0,-5.0 L 15.0,-5.0 L 16.0,-10.0 L 35.0,-10.0 L 37.0,0.0 L 55.0,0.0 L 57.0,-10.0 L 75.0,-10.0 L 77.0,0.0 L 95.0,0.0 L 97.0,-10.0 L 115.0,-10.0 L 117.0,0.0 L 135.0,0.0 L 137.0,-10.0 L 155.0,-10.0 L 157.0,0.0 L 190.0,0.0" />
       </g>
     </g>
   </g>

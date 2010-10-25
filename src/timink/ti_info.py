@@ -35,4 +35,4 @@ assert re.match(r'^[a-z]+$', EXTENSION_NAME)
 #     If one of the elements or attributes is removed are has a different meaning:
 #         Increase <major> and set <minor> to 0.
 
-VERSIONJOINT = VersionJoint('0.1.0/1.0')
+VERSIONJOINT = VersionJoint('0.2.0/1.1')
