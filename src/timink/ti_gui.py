@@ -454,6 +454,19 @@ class SignalClusterEditor(object):
 
         ok = False
 
+        # set default dialog size based on screen size and natural dialog size
+        targetWidthToHeightRatio = 1.1
+        screen = dlg.get_screen()
+        screenWidth = screen.get_width()
+        screenHeight = screen.get_height()
+        naturalWidth, naturalHeight = dlg.get_size()
+        width = max(min(screenWidth // 3, 3 * naturalWidth), naturalWidth)
+        height = max(min(screenHeight // 3, 3 * naturalHeight), naturalHeight)
+        height = max(int(width / targetWidthToHeightRatio), naturalHeight)
+        width = max(int(height * targetWidthToHeightRatio), naturalWidth)
+        width = min(width, screenWidth // 2)
+        dlg.set_default_size(width, height)
+
         self.signalClusterSpecTextView.grab_focus()
         response = dlg.run()
         while response == gtk.RESPONSE_ACCEPT:
