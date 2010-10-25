@@ -480,6 +480,7 @@ class SignalClusterEditor(object):
                 invCharPosList = SignalClusterSpecValidator.getInvalidCharPos(signalClusterSpecStr)
                 nonmatchingParenthesisIndex = SignalClusterSpecValidator.getFirstNonmatchingParenthesis(signalClusterSpecStr)
                 invMultiStateRange = SignalClusterSpecValidator.getFirstInvalidMultiPathState(signalClusterSpecStr)
+                invShadingRange = SignalClusterSpecValidator.getFirstInvalidShading(signalClusterSpecStr)
                 invBreakRange = SignalClusterSpecValidator.getFirstInvalidBreak(signalClusterSpecStr)
                 if len(invCharPosList) > 0:
                     showErrorDlg(u'Invalid character in signal cluster specification.',
@@ -505,6 +506,12 @@ class SignalClusterEditor(object):
                                + u'Example: "(0-)".')
                     selStart = textBuffer.get_iter_at_offset(invMultiStateRange[0])
                     selEnd = textBuffer.get_iter_at_offset(invMultiStateRange[1])
+                    textBuffer.select_range(selStart, selEnd)
+                elif invShadingRange is not None:
+                    showErrorDlg(u'Invalid shading.',
+                                 u'A valid shading encloses at least one state specification.')
+                    selStart = textBuffer.get_iter_at_offset(invShadingRange[0])
+                    selEnd = textBuffer.get_iter_at_offset(invShadingRange[1])
                     textBuffer.select_range(selStart, selEnd)
                 elif invBreakRange is not None:
                     showErrorDlg(u'Invalid signal break.',

@@ -226,10 +226,18 @@ class SignalClusterSpecValidator(object):
         return invalidCharRange
 
     @staticmethod
+    def getFirstInvalidShading(signalClusterSpec):
+        invalidCharRange = None
+        m = re.search(r'(\[[ \t]*\])', signalClusterSpec)
+        if m is not None:
+            invalidCharRange = (m.start(1), m.end(1))
+        return invalidCharRange
+
+    @staticmethod
     def getFirstInvalidBreak(signalClusterSpec):
         invalidCharRange = None
-        breakStartRegexp = re.compile(r'^[ \t]*(_([ \t]*_)*)', re.MULTILINE)
-        breakEndRegexp = re.compile(r'(_([ \t]*_)*)[ \t]*$', re.MULTILINE)
+        breakStartRegexp = re.compile(r'^[ \t\[]*(_([ \t]*_)*)', re.MULTILINE)
+        breakEndRegexp = re.compile(r'(_([ \t]*_)*)[ \t\]]*$', re.MULTILINE)
         m = breakStartRegexp.search(signalClusterSpec)
         if m:
             invalidCharRange = (m.start(1), m.end(1))
@@ -297,12 +305,19 @@ class SignalClusterSpecValidator(object):
         assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X()') == (3, 5)
         assert SignalClusterSpecValidator.getFirstInvalidMultiPathState('01X(\n') == (3, 5)
 
+        assert SignalClusterSpecValidator.getFirstInvalidShading('[0]') is None
+        assert SignalClusterSpecValidator.getFirstInvalidShading('  [ \t]  ') == (2, 6)
+
         assert SignalClusterSpecValidator.getFirstInvalidBreak('') is None
         assert SignalClusterSpecValidator.getFirstInvalidBreak('0_1\n10-\r\n0__0_ _1') is None
         assert SignalClusterSpecValidator.getFirstInvalidBreak(' __ _0') == (1, 5)
         assert SignalClusterSpecValidator.getFirstInvalidBreak('0 _  __ ') == (2, 7)
         assert SignalClusterSpecValidator.getFirstInvalidBreak('0_1\n10-\r\n _\t_ 0__0_ _1') == (10, 13)
         assert SignalClusterSpecValidator.getFirstInvalidBreak('0_1_\n10-\r\n _\t_ 0__0_ _1') == (3, 4)
+        assert SignalClusterSpecValidator.getFirstInvalidBreak('[_1]0') == (1, 2)
+        assert SignalClusterSpecValidator.getFirstInvalidBreak('0[_1]0') is None
+        assert SignalClusterSpecValidator.getFirstInvalidBreak('0[1_]0') is None
+        assert SignalClusterSpecValidator.getFirstInvalidBreak('0[1_]') == (3, 4)
 
         assert SignalClusterSpecValidator.isValid('-[X(01-)]0')
         assert not SignalClusterSpecValidator.isValid('-[X()]0')
