@@ -372,13 +372,15 @@ class TiminkEffect(inkex.Effect):
                 assert isfinite(signalHeight)
                 edgeTimeWidth = UsrParams.getLengthValue(usrParams.edgeTimeWidth)
                 assert isfinite(edgeTimeWidth)
+                breakTimeWidth = UsrParams.getLengthValue(usrParams.breakTimeWidth)
+                assert isfinite(breakTimeWidth)
 
                 # add / update signal groups according to sgInfoDict, signalOriginDict, signalSpecStrs
                 for signalIndex in range(0, len(signalSpecStrs)):
                     signalGroup, signalPaths, shading = sgInfoDict.get(signalIndex, (None, [], None))
                     signalOrigin = signalOriginDict[signalIndex]
 
-                    signalSpec = SignalSpec.createFromStr(signalSpecStrs[signalIndex], unitTimeWidth, 5.0)#???
+                    signalSpec = SignalSpec.createFromStr(signalSpecStrs[signalIndex], unitTimeWidth, breakTimeWidth)
                     assert signalSpec is not None
                     pathFragmentVerticesList, shading01VerticesList = signalSpec.getAllPathVerticesAndShading(edgeTimeWidth)
                     pathNo = len(pathFragmentVerticesList)

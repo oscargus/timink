@@ -199,6 +199,7 @@ class SignalClusterEditor(object):
         self.unitTimeWidthEditor = None
         self.signalHeightEditor = None
         self.edgeTimeWidthEditor = None
+        self.breakTimeWidthEditor = None
         self.placmHomogRadioButton = None
         self.originDistXEditor = None
         self.originDistYEditor = None
@@ -248,7 +249,7 @@ class SignalClusterEditor(object):
         return signalClusterSpecPageVBox
 
     def _createLayoutPage(self):
-        table = gtk.Table(rows=2, columns=3, homogeneous=False)
+        table = gtk.Table(rows=3, columns=3, homogeneous=False)
         table.set_border_width(6)
         table.set_col_spacing(column=0, spacing=12)
         table.show()
@@ -277,9 +278,16 @@ class SignalClusterEditor(object):
         editor = LengthEditor(
             initialValueStr=self.usrParams.edgeTimeWidth,
             minValue=0.0, maxValue=100.0, dispDigitNo=3,
-            tooltipStr=u'Width of rising or falling edge (0% to 100%) along the s axis (before transformations).')
+            tooltipStr=u'Width of rising or falling edge (0% to 100%) along the t axis (before transformations).')
         appendToTable(table, u'Edge time width:', editor, 2)
         self.edgeTimeWidthEditor = editor
+
+        editor = LengthEditor(
+            initialValueStr=self.usrParams.breakTimeWidth,
+            minValue=0.001, maxValue=100.0, dispDigitNo=3,
+            tooltipStr=u'Width of a "signal break" along the t axis (before transformations).')
+        appendToTable(table, u'Break time width:', editor, 3)
+        self.breakTimeWidthEditor = editor
 
         signalGeomFrame = gtk.Frame(label=u'Signal Dimensions')
         signalGeomFrame.set_border_width(6)
@@ -458,6 +466,7 @@ class SignalClusterEditor(object):
             usrParams.unitTimeWidth = self.unitTimeWidthEditor.getLengthValue()
             usrParams.signalHeight = self.signalHeightEditor.getLengthValue()
             usrParams.edgeTimeWidth = self.edgeTimeWidthEditor.getLengthValue()
+            usrParams.breakTimeWidth = self.breakTimeWidthEditor.getLengthValue()
             usrParams.originDistX = self.originDistXEditor.getLengthValue()
             usrParams.originDistY = self.originDistYEditor.getLengthValue()
             if self.placmHomogRadioButton.get_active():
@@ -528,6 +537,7 @@ class SignalClusterEditor(object):
 
         dlg.destroy()
 
+        # on FreeBSD (not on MS Windows):
         # clipboard is destroyed, gtk.clipboard_get().store() doesn't help ???
 
         r = None

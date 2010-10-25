@@ -76,6 +76,7 @@ class UsrParams(object):
         self.unitTimeWidth = u'10px'
         self.signalHeight = u'10px'
         self.edgeTimeWidth = u'2px'
+        self.breakTimeWidth = u'2px'
         self.placementMethod = u'homogeneous'
         self.originDistX = u'0px'
         self.originDistY = u'20px'
@@ -85,6 +86,7 @@ class UsrParams(object):
         ok =        UsrParams.getLengthValue(self.unitTimeWidth) > 0.0
         ok = ok and UsrParams.getLengthValue(self.signalHeight) > 0.0
         ok = ok and UsrParams.getLengthValue(self.edgeTimeWidth) >= 0.0
+        ok = ok and UsrParams.getLengthValue(self.breakTimeWidth) > 0.0
         ok = ok and self.placementMethod in (u'homogeneous', u'individual')
         ok = ok and isfinite(UsrParams.getLengthValue(self.originDistY))
         ok = ok and UsrParams.getLengthValue(self.originDistY) > 0.0
@@ -102,6 +104,7 @@ class UsrParams(object):
             u'unitTimeWidth':   self.unitTimeWidth,
             u'signalHeight':    self.signalHeight,
             u'edgeTimeWidth':   self.edgeTimeWidth,
+            u'breakTimeWidth':  self.breakTimeWidth,
             u'placementMethod': self.placementMethod,
             u'originDistX':     self.originDistX,
             u'originDistY':     self.originDistY
@@ -159,6 +162,10 @@ class UsrParams(object):
                 elif k == u'edgeTimeWidth':
                     if UsrParams.getLengthValue(v) >= 0.0:
                         params.edgeTimeWidth = v
+                        valueOk = True
+                elif k == u'breakTimeWidth':
+                    if UsrParams.getLengthValue(v) > 0.0:
+                        params.breakTimeWidth = v
                         valueOk = True
                 elif k == u'placementMethod':
                     if v in (u'homogeneous', u'individual'):
