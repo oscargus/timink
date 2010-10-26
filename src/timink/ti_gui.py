@@ -454,17 +454,24 @@ class SignalClusterEditor(object):
 
         ok = False
 
-        # set default dialog size based on screen size and natural dialog size
-        targetWidthToHeightRatio = 1.1
+        # set default dialog size based on its natural dialog size and the size of the smallest monitor
         screen = dlg.get_screen()
-        screenWidth = screen.get_width()
-        screenHeight = screen.get_height()
+        monitorWidth = screen.get_width() # fallback
+        monitorHeight = screen.get_height() # fallback
+        smallestMonitorDiagonalSqr = None
+        for monitorIndex in range(0, screen.get_n_monitors()):
+            monitorGeometry = screen.get_monitor_geometry(monitorIndex)
+            monitorDiagonalSqr = monitorGeometry.width * monitorGeometry.width + monitorGeometry.height * monitorGeometry.height
+            if smallestMonitorDiagonalSqr is None or monitorDiagonalSqr < smallestMonitorDiagonalSqr:
+                monitorWidth = monitorGeometry.width
+                monitorHeight = monitorGeometry.height
         naturalWidth, naturalHeight = dlg.get_size()
-        width = max(min(screenWidth // 3, 3 * naturalWidth), naturalWidth)
-        height = max(min(screenHeight // 3, 3 * naturalHeight), naturalHeight)
+        targetWidthToHeightRatio = 1.1
+        width = max(min(monitorWidth // 3, 3 * naturalWidth), naturalWidth)
+        height = max(min(monitorHeight // 3, 3 * naturalHeight), naturalHeight)
         height = max(int(width / targetWidthToHeightRatio), naturalHeight)
         width = max(int(height * targetWidthToHeightRatio), naturalWidth)
-        width = min(width, screenWidth // 2)
+        width = min(width, monitorWidth // 2)
         dlg.set_default_size(width, height)
 
         self.signalClusterSpecTextView.grab_focus()
