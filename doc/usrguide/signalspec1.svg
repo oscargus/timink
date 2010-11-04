@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:ns0="http://timink.sourceforge.net/"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -14,8 +15,11 @@
    inkscape:version="0.47 r22583"
    version="1.1"
    id="svg2816"
-   height="155"
-   width="265">
+   height="131"
+   width="439"
+   inkscape:export-filename="/home/dlutz/Desktop/timink/stable/doc/usrguide/signalspec1.png"
+   inkscape:export-xdpi="600"
+   inkscape:export-ydpi="600">
   <title
      id="title2959">Elements of a signal specification: state specifications</title>
   <sodipodi:namedview
@@ -26,8 +30,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.2882353"
-     inkscape:cx="164.45106"
-     inkscape:cy="134.29626"
+     inkscape:cx="204.76591"
+     inkscape:cy="62.018476"
      inkscape:document-units="px"
      inkscape:current-layer="g2847"
      showgrid="true"
@@ -66,6 +70,11 @@
   </metadata>
   <defs
      id="defs2822">
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#pattern2945"
+       id="pattern2992"
+       patternTransform="translate(235,466)" />
     <pattern
        inkscape:collect="always"
        xlink:href="#pattern4896"
@@ -196,7 +205,7 @@
      inkscape:label="signal"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-845)">
+     transform="translate(0,-869)">
     <g
        ns0:usrparams="edgeTimeWidth:2.0px;originDistX:0.0px;originDistY:20.0px;placementMethod:homogeneous;signalHeight:10.0px;unitTimeWidth:10.0px"
        ns0:signalclusterspec="0[X]1XYx0(0010)0(0001)0"
@@ -209,7 +218,7 @@
          id="g2895">
         <path
            id="path5700"
-           style="fill:url(#pattern2945);fill-opacity:1;stroke:none"
+           style="fill:url(#pattern2992);fill-opacity:1;stroke:none"
            inkscape:label="shadingpath"
            d="m 0,0 m 10,0 10,0 2,-10 -10,0 z" />
         <path
@@ -234,12 +243,33 @@
            d="m 0,0 10,0 2,-10 38,0 2,10 58,0" />
       </g>
     </g>
+    <path
+       d="m 269,949 20,0 2,-10 8,0 2,10 8,0 2,-10 18,0 2,10 28,0 2,-10 8,0 2,10 8,0"
+       inkscape:label="signalpath3"
+       id="path2964"
+       style="fill:none;stroke:#0000ff;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+    <path
+       d="m 269,927 10,0 2,-10 28,0 2,10 28,0 2,-10 8,0 2,10 28,0"
+       inkscape:label="signalpath2"
+       id="path2966"
+       style="fill:none;stroke:#00ff00;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+    <path
+       d="m 269,905 20,0 2,-10 8,0 2,10 18,0 2,-10 8,0 2,10 48,0"
+       inkscape:label="signalpath1"
+       id="path2968"
+       style="fill:none;stroke:#999999"
+       sodipodi:nodetypes="cccccccccc" />
+    <path
+       d="m 269,883 10,0 2,-10 38,0 2,10 58,0"
+       inkscape:label="signalpath0"
+       id="path2970"
+       style="fill:none;stroke:#000000" />
   </g>
   <g
      inkscape:label="time grid"
      id="layer3"
      inkscape:groupmode="layer"
-     transform="translate(0,62)">
+     transform="translate(0,38)">
     <path
        style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:0.99999999, 0.99999999;stroke-dashoffset:0"
        d="m 115,-26 0,74"
@@ -305,75 +335,55 @@
      inkscape:label="annotation"
      inkscape:groupmode="layer"
      id="g2847"
-     transform="translate(0,-845)">
+     transform="translate(0,-869)">
     <text
        sodipodi:linespacing="125%"
        id="text4053"
-       y="863"
-       x="90.472656"
+       y="879"
+       x="385"
        style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ff0000;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
-         y="863"
-         x="90.472656"
+         y="879"
+         x="385"
          id="tspan4055"
          sodipodi:role="line">signal path 0</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
-       x="108.47266"
-       y="853"
+       x="385"
+       y="901"
        id="text2951"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan2953"
-         x="108.47266"
-         y="853"
+         x="385"
+         y="901"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ff0000;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans">signal path 1</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
-       x="154.47266"
-       y="863"
+       x="385"
+       y="923"
        id="text2955"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan2957"
-         x="154.47266"
-         y="863"
+         x="385"
+         y="923"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ff0000;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans">signal path 2</tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text4478"
-       y="853"
-       x="174.47266"
+       y="945"
+       x="385"
        style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ff0000;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
-         y="853"
-         x="174.47266"
+         y="945"
+         x="385"
          id="tspan4480"
          sodipodi:role="line">signal path 3</tspan></text>
-    <path
-       style="fill:none;stroke:#ff0000;stroke-width:0.49999997;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMY)"
-       d="m 215,873 0,-17"
-       id="path4877"
-       sodipodi:nodetypes="cc" />
-    <path
-       sodipodi:nodetypes="cc"
-       style="fill:#ff0000;fill-opacity:1;stroke:#ff0000;stroke-width:0.49999997;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-end:url(#DotM6)"
-       d="m 191,866 0,7"
-       id="path4879" />
-    <path
-       sodipodi:nodetypes="cc"
-       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMV)"
-       d="m 140,873 0,-7"
-       id="path4885" />
-    <path
-       id="path4476"
-       d="m 150,883 0,-27"
-       style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:url(#DotMV)"
-       sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
        style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
@@ -525,12 +535,56 @@
          y="881"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ff0000;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
          id="tspan2960">signal:</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
+       x="322.52734"
+       y="935.44141"
+       id="text2984"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2986"
+         x="322.52734"
+         y="935.44141">+</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text2988"
+       y="878.76996"
+       x="248.6152"
+       style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
+       xml:space="preserve"><tspan
+         y="878.76996"
+         x="248.6152"
+         id="tspan2990"
+         sodipodi:role="line">=</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3003"
+       y="913.44141"
+       x="322.52734"
+       style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
+       xml:space="preserve"><tspan
+         y="913.44141"
+         x="322.52734"
+         id="tspan3005"
+         sodipodi:role="line">+</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
+       x="322.52734"
+       y="891.44141"
+       id="text3007"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3009"
+         x="322.52734"
+         y="891.44141">+</tspan></text>
   </g>
   <g
      inkscape:label="state specs"
      id="layer2"
      inkscape:groupmode="layer"
-     transform="translate(0,62)">
+     transform="translate(0,38)">
     <text
        xml:space="preserve"
        style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans Mono;-inkscape-font-specification:Bitstream Vera Sans Mono"
