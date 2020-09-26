@@ -176,7 +176,7 @@ class TiminkEffect(inkex.Effect):
 
 
     @staticmethod
-    def completeOriginsHomog(incomplSignalOriginDict, n, (originDiffX, originDiffY)):
+    def completeOriginsHomog(incomplSignalOriginDict, n, originDiff):
         """
         Returns a copy of a dictionary of signal origins, extended to a given number of signals.
 
@@ -199,6 +199,7 @@ class TiminkEffect(inkex.Effect):
               signalOriginDict[i] is the signal origin
         """
 
+        (originDiffX, originDiffY) = originDiff
         assert incomplSignalOriginDict is not None
         assert len(incomplSignalOriginDict) > 0
         assert None not in incomplSignalOriginDict.values()
@@ -238,15 +239,19 @@ class TiminkEffect(inkex.Effect):
         assert len(incomplSignalOriginDict) == 0 \
             or (min(incomplSignalOriginDict) >= 0 and max(incomplSignalOriginDict) < n)
 
-        def vectorDiff((aX, aY), (bX, bY)):
+        def vectorDiff(a, b):
+            (aX, aY) = a
+            (bX, bY) = b
             return (aX - bX, aY - bY)
 
-        def vectorHomoMapping((vX, vY), scale, (oX, oY)):
+        def vectorHomoMapping(v, scale, o):
+            (vX, vY) = v
+            (oX, oY) = o
             return (float(vX * scale + oX), float(vY * scale + oY))
 
         signalOriginDict = dict(incomplSignalOriginDict)
 
-        for signalIndex, signalOrigin in incomplSignalOriginDict.iteritems():
+        for signalIndex, signalOrigin in incomplSignalOriginDict.items():
             if signalOrigin is not None:
                 signalOriginDict[signalIndex] = signalOrigin
 
@@ -281,14 +286,14 @@ class TiminkEffect(inkex.Effect):
             signalOriginDict[j] = vectorHomoMapping(d, j - iL, signalOriginL)
 
         assert None not in signalOriginDict.values()
-        assert sorted(signalOriginDict.keys()) == range(0, n)
+        assert list(sorted(signalOriginDict.keys())) == list(range(0, n))
         return signalOriginDict
 
 
     def effect(self):
         """Perform the effect: create/modify Timink object (signal cluster group)."""
 
-        selectedSignalClusterGroup, sg, so = SignalClusterGElem.getSelected(self.selected)
+        selectedSignalClusterGroup, sg, so = SignalClusterGElem.getSelected(self.svg.selected)
         try:
             if len(so) > 0:
                 if len(so) == 1:
@@ -339,7 +344,7 @@ class TiminkEffect(inkex.Effect):
 
                 if selectedSignalClusterGroup is None:
                     # create new signal cluster group
-                    scg = SignalClusterGElem.addEmpty(self.current_layer, signalClusterSpecStr, usrParams)
+                    scg = SignalClusterGElem.addEmpty(self.svg.get_current_layer(), signalClusterSpecStr, usrParams)
                 else:
                     scg = selectedSignalClusterGroup
                     removedAttribs = sorted(list(scg.setAttribs(signalClusterSpecStr, usrParams)))
@@ -353,13 +358,13 @@ class TiminkEffect(inkex.Effect):
                 del sgDict
 
                 # set/complete signal origins
-                centerOfView = (round(self.view_center[0]), round(self.view_center[1]))
+                centerOfView = (round(self.svg.namedview.center[0]), round(self.svg.namedview.center[1]))
                 originDistY = UsrParams.getLengthValue(usrParams.originDistY)
                 originDistX = UsrParams.getLengthValue(usrParams.originDistX)
                 assert isfinite(originDistX) and isfinite(originDistY)
                 if len(signalOriginDict) == 0:
                     signalOriginDict[0] = centerOfView
-                if len(signalOriginDict) <= 1 or usrParams.placementMethod == u'homogeneous':
+                if len(signalOriginDict) <= 1 or usrParams.placementMethod == 'homogeneous':
                     signalOriginDict = TiminkEffect.completeOriginsHomog(signalOriginDict, len(signalSpecStrs), (originDistX, originDistY))
                 else:
                     signalOriginDict = TiminkEffect.completeOriginsByInterp(signalOriginDict, len(signalSpecStrs))
@@ -503,7 +508,7 @@ class TiminkEffect(inkex.Effect):
                         printInfo('Signal {si}: Did reset stroke style from shading \'path\' element to \'none\'.'.format(si=signalIndex))
 
                     # sort signal path elements (drawing order)
-                    existingSignalPaths = filter(lambda e: e is not None, signalPaths)
+                    existingSignalPaths = list(filter(lambda e: e is not None, signalPaths))
                     assert len(existingSignalPaths) > 0
                     for i in range(1, len(existingSignalPaths)):
                         existingSignalPaths[i - 1].makeSiblingPredecessorOf(existingSignalPaths[i])
@@ -517,7 +522,7 @@ class TiminkEffect(inkex.Effect):
                     assert len(signalPaths) > 0
                     sgInfoDict[signalIndex] = (signalGroup, signalPaths, shading)
 
-        except UserError, e:
+        except UserError as e:
             showErrorDlg(e.msg, e.hint)
             sys.exit(1)
 

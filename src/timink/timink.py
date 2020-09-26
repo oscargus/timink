@@ -1,8 +1,8 @@
 import sys
-if sys.version_info >= (2, 6) and sys.version_info < (3, 0):
+if sys.version_info >= (3, 5):
     from timinkeffect import TiminkEffect
     TiminkEffect.testIt()
-    TiminkEffect().affect()
+    TiminkEffect().run()
 else:
-    print >> sys.stderr, 'Error: Requires Python 2.x with x >= 6.'
+    print('Error: Requires Python 3.5 or higher.', file=sys.stderr)
     sys.exit(1)

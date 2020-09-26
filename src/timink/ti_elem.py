@@ -24,6 +24,7 @@ from ti_math import isfinite
 from ti_pointtransform import PointTransf
 from ti_signalspec import SignalClusterSpecValidator
 from ti_usrparams import UsrParams
+from lxml import etree
 
 NSS = inkex.NSS
 assert 'timink' not in NSS
@@ -87,9 +88,13 @@ class Elem:
                 isComplete = True
             else:
                 transName, transfArgs, sR = m.groups()
-                transfArgs = re.split(' *,? *', transfArgs)
+                print(transName)
+                print(transfArgs)
+                
+                transfArgs = re.split('[, ]+?', transfArgs)
                 if transfArgs == [ '' ]:
                     transfArgs = []
+                transfArgs = [x for x in transfArgs if not x == '']
                 transfTokenList.append((transName, transfArgs))
                 isComplete = len(sR) == 0
         return transfTokenList, sR
@@ -122,7 +127,7 @@ class Elem:
         if len(invalidEnd) == 0:
             try:
                 for transfName, transfArgTokenList in transfTokenList:
-                    transfArgList = map(lambda s: float(s), transfArgTokenList)
+                    transfArgList = list(map(lambda s: float(s), transfArgTokenList))
                     argNo = len(transfArgList)
                     t = None
                     if transfName == 'translate':
@@ -429,7 +434,7 @@ class PathElem(Elem):
             'style': simplestyle.formatStyle(styleDict),
             'd':     pathSpec
         }
-        return PathElem(inkex.etree.SubElement(parentNode, inkex.addNS('path','svg'), attribs))
+        return PathElem(etree.SubElement(parentNode, inkex.addNS('path','svg'), attribs))
 
 
 class SignalGElem(Elem):
@@ -516,7 +521,7 @@ class SignalGElem(Elem):
             shadingPath = None
             wasteSignalPaths = []
             if pathNodeDict is not None:
-                for label, nodes in pathNodeDict.iteritems():
+                for label, nodes in pathNodeDict.items():
                     if label == SignalGElem._LABEL_SHADINGPATH:
                         shadingPath = nodes[0]
                         if len(nodes) > 1:
@@ -548,7 +553,7 @@ class SignalGElem(Elem):
         assert parentNode is not None
         assert signalIndex >= 0
         label = SignalGElem._LABEL_SIGNALGROUP + str(signalIndex)
-        signalGroup = SignalGElem(inkex.etree.SubElement(parentNode, inkex.addNS('g','svg')))
+        signalGroup = SignalGElem(etree.SubElement(parentNode, inkex.addNS('g','svg')))
         signalGroup.setLabel(label)
         return signalGroup
 
@@ -630,11 +635,11 @@ class SignalClusterGElem(Elem):
         assert '{' not in NSS['timink'] and '}' not in NSS['timink']
         attribDict = dict()
         try:
-            for a, v in self._node.attrib.iteritems():
+            for a, v in self._node.attrib.items():
                 prefix = '{{{ns}}}'.format(ns=NSS['timink'])
                 if a.startswith(prefix):
                     an = a[len(prefix):]
-                    attribDict[an] = v.decode('string-escape').decode('utf-8')
+                    attribDict[an] = v
         except UnicodeDecodeError:
             attribDict = None
         return attribDict
@@ -691,8 +696,8 @@ class SignalClusterGElem(Elem):
         attribDict[SignalClusterGElem._ATTRIBNAME_VERSION]           = str(VERSIONJOINT)
         attribDict[SignalClusterGElem._ATTRIBNAME_SIGNALCLUSTERSPEC] = signalClusterSpecStr
         attribDict[SignalClusterGElem._ATTRIBNAME_USRPARAMS]         = usrParams.toStr()
-        for a, v in attribDict.iteritems():
-            attribDict[a] = v.encode('utf-8').encode('string-escape')
+        for a, v in attribDict.items():
+            attribDict[a] = v
         for a in attribDict.keys():
             self._node.attrib['{{{ns}}}{a}'.format(ns=NSS['timink'], a=a)] = attribDict[a]
         return removedAttribSet
@@ -766,7 +771,7 @@ class SignalClusterGElem(Elem):
 
         selectedSignalClusterGroups = set()
         selectedOtherElems = []
-        for key, node in selectedNodeDict.iteritems():
+        for key, node in selectedNodeDict.items():
             gnode = findLowestContaining(node)
             if gnode is not None:
                 # found containing signal cluster group
@@ -815,7 +820,7 @@ class SignalClusterGElem(Elem):
         parentNode = Elem(parentNode).getNode()
         assert SignalClusterSpecValidator.isValid(signalClusterSpecStr)
         assert usrParams is not None and usrParams.isValid()
-        signalGroup = SignalClusterGElem(inkex.etree.SubElement(parentNode, inkex.addNS('g','svg')))
+        signalGroup = SignalClusterGElem(etree.SubElement(parentNode, inkex.addNS('g','svg')))
         removedAttribSet = signalGroup.setAttribs(signalClusterSpecStr, usrParams)
         assert len(removedAttribSet) == 0
         assert signalGroup.isValid(True)
