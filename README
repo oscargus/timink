@@ -1,18 +1,5 @@
 Inkscape extension for digital timing diagrams.
 
-http://timink.sourceforge.net.
+This is based on the source code in http://timink.sourceforge.net
 
-Requires (tested configuration):
-
-  FreeBSD:
-  
-   - Inkscape 0.47
-   - Python 2.6.5
-   - GTK+ 2.2.x
-   - pygtk 2.17.0
-   - lxml 2.2.4
-   
-  MS Windows:
-  
-   - Inkscape 0.48 (with Python 2.6.5 and GTK+ 2.16.x)
-   - pygtk 2.16.x (from pygtk-2.16_for_inkscape-0.48.zip)
+Converted to work with Inkscape 1.0 and Python 3.
